@@ -1,0 +1,21 @@
+{
+  "id": "dlshop",
+  "title": "DL_shop",
+  "version": "0.0.1",
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "authors": [
+    {
+      "name": "Miirflin",
+      "email": "mrmiirlfinn@gmail.com",
+      "discord": "miirflin",
+      "flags": {}
+    }
+  ],
+  "flags": {
+    "canUpload": true
+  },
+  "description": ""
+}
