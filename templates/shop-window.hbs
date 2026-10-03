@@ -1,0 +1,111 @@
+<div class="dlshop-shop" data-wealth="{{#if actor}}{{wealth}}{{else}}0{{/if}}" {{#if shop.background}}style="--dlshop-bg: url('{{shop.background}}')"{{/if}}>
+  {{#if missing}}
+  <p class="dlshop-empty">{{localize "DLSHOP.Error.NoShop"}}</p>
+  {{else}}
+
+  <header class="dlshop-hero">
+    {{#if keeper.img}}
+    <figure class="dlshop-keeper">
+      <img src="{{keeper.img}}" alt="{{keeper.name}}">
+      {{#if keeper.name}}<figcaption>{{keeper.name}}</figcaption>{{/if}}
+    </figure>
+    {{/if}}
+    <div class="dlshop-titles">
+      <h1>{{shop.name}}</h1>
+      {{#if shop.subtitle}}<h2>{{shop.subtitle}}</h2>{{/if}}
+      <div class="dlshop-flourish" aria-hidden="true">❦</div>
+      {{#if shop.slogan}}<p class="dlshop-slogan">“{{shop.slogan}}”</p>{{/if}}
+      {{#if shop.hours.enabled}}<p class="dlshop-hours-line"><i class="fa-regular fa-clock"></i> {{localize "DLSHOP.OpenHours" from=shop.hours.from to=shop.hours.to}}</p>{{/if}}
+    </div>
+    {{#if isGM}}
+    <button type="button" class="dlshop-manage" data-action="manage" data-tooltip="DLSHOP.Manage">
+      <i class="fa-solid fa-feather-pointed"></i>
+    </button>
+    {{/if}}
+  </header>
+
+  {{#if closed}}<p class="dlshop-banner">{{localize "DLSHOP.ClosedGM"}}</p>{{/if}}
+  {{#if outsideHours}}<p class="dlshop-banner">{{localize "DLSHOP.OutsideHoursGM" from=shop.hours.from to=shop.hours.to}}</p>{{/if}}
+
+  {{#if description}}
+  <section class="dlshop-desc">{{{description}}}</section>
+  {{/if}}
+
+  <nav class="dlshop-tabs">
+    <button type="button" class="{{#if (eq tab 'buy')}}active{{/if}}" data-action="shopTab" data-tab="buy">
+      <i class="fa-solid fa-scale-balanced"></i> {{localize "DLSHOP.TabBuy"}}
+    </button>
+    <button type="button" class="{{#if (eq tab 'sell')}}active{{/if}}" data-action="shopTab" data-tab="sell">
+      <i class="fa-solid fa-sack-dollar"></i> {{localize "DLSHOP.TabSell"}}
+    </button>
+  </nav>
+
+  <div class="dlshop-toolbar">
+    <label class="dlshop-searchbox">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="search" class="dlshop-search" value="{{filter}}" placeholder="{{localize 'DLSHOP.Search'}}">
+    </label>
+  </div>
+
+  <ol class="dlshop-list" data-tab-list="{{tab}}">
+    {{#if (eq tab "buy")}}
+      {{#each wares}}
+      <li class="dlshop-row {{#if soldOut}}sold-out{{/if}} {{#unless enabled}}gm-hidden{{/unless}}" data-id="{{id}}" data-name="{{name}}" data-price="{{price}}">
+        <div class="dlshop-icon-wrap">
+          <img class="dlshop-icon" src="{{img}}" alt="" {{#if tooltip}}data-tooltip-html="{{tooltip}}"{{/if}}>
+          {{#if badge}}<span class="dlshop-badge">{{badge}}</span>{{/if}}
+          {{#if rank}}<span class="dlshop-rank" data-rank="{{rank}}">{{rank}}</span>{{/if}}
+        </div>
+        <div class="dlshop-name">
+          <span {{#if tooltip}}data-tooltip-html="{{tooltip}}"{{/if}}>{{name}}</span>
+          <small>
+            {{#unless enabled}}<i class="fa-solid fa-eye-slash" data-tooltip="DLSHOP.HiddenWare"></i>{{/unless}}
+            {{stockText}}
+          </small>
+        </div>
+        <span class="dlshop-price {{#unless affordable}}dear{{/unless}}">{{dlshopCoins price}}</span>
+        <div class="dlshop-qty">
+          <button type="button" data-action="step" data-step="-1">−</button>
+          <input type="number" value="1" min="1" {{#if maxQty}}max="{{maxQty}}"{{/if}} step="1">
+          <button type="button" data-action="step" data-step="1">+</button>
+        </div>
+        <button type="button" class="dlshop-deal" data-action="buy" {{disabled (or soldOut (not @root.actor))}}>{{localize "DLSHOP.Buy"}}</button>
+      </li>
+      {{else}}
+      <li class="dlshop-empty">{{localize "DLSHOP.NoWares"}}</li>
+      {{/each}}
+    {{else}}
+      {{#each sellables}}
+      <li class="dlshop-row" data-uuid="{{uuid}}" data-name="{{name}}" data-price="{{price}}">
+        <img class="dlshop-icon" src="{{img}}" alt="">
+        <div class="dlshop-name">
+          <span>{{name}}</span>
+          <small>{{localize "DLSHOP.YouHave" n=quantity}}</small>
+        </div>
+        <span class="dlshop-price">{{dlshopCoins price}}</span>
+        <div class="dlshop-qty">
+          <button type="button" data-action="step" data-step="-1">−</button>
+          <input type="number" value="1" min="1" max="{{quantity}}" step="1">
+          <button type="button" data-action="step" data-step="1">+</button>
+        </div>
+        <button type="button" class="dlshop-deal" data-action="sell">{{localize "DLSHOP.Sell"}}</button>
+      </li>
+      {{else}}
+      <li class="dlshop-empty">{{#if actor}}{{localize "DLSHOP.NothingToSell"}}{{else}}{{localize "DLSHOP.NoCustomer"}}{{/if}}</li>
+      {{/each}}
+    {{/if}}
+  </ol>
+
+  <footer class="dlshop-purse">
+    {{#if actor}}
+    <img src="{{actor.img}}" alt="">
+    <span class="dlshop-customer">{{actor.name}}</span>
+    <span class="dlshop-coins dl-coins">
+      {{#each purse}}<span class="dl-coin {{key}}" data-tooltip="{{name}}">{{n}}</span>{{/each}}
+    </span>
+    {{else}}
+    <span class="dlshop-customer">{{localize "DLSHOP.NoCustomer"}}</span>
+    {{/if}}
+  </footer>
+  {{/if}}
+</div>

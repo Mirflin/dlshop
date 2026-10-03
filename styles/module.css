@@ -1,0 +1,1191 @@
+@import url("https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap");
+
+/* ==========================================================================
+   DL Shop — colours match the Magicpunk TRPG character sheet
+   ========================================================================== */
+
+.dlshop,
+#dlshop-prompt {
+  --dl-bg: #1b1f22;          /* window background */
+  --dl-panel: #23292d;       /* inputs, rows, cards */
+  --dl-raised: #2b3338;      /* headers, toolbars, buttons */
+  --dl-border: #37424a;
+  --dl-text: #dce4e8;
+  --dl-muted: #8c9ba4;
+  --dl-accent: #16a3a8;
+  --dl-accent-dark: #0e7479;
+  --dl-accent-soft: rgb(22 163 168 / 0.2);
+  --dl-danger: #e06b72;
+  --dl-font-title: "IM Fell English SC", "Modesto Condensed", serif;
+  --dl-font-body: "IM Fell English", "Amiri", serif;
+}
+
+/* --- Window frame -------------------------------------------------------- */
+
+.application.dlshop {
+  color-scheme: dark;
+  color: var(--dl-text);
+  font-family: var(--dl-font-body);
+  font-size: 15px;
+  background: var(--dl-bg);
+  border: 1px solid var(--dl-border);
+  border-radius: 6px;
+  box-shadow: 0 12px 40px #000c;
+}
+
+.application.dlshop .window-header {
+  background: var(--dl-panel);
+  border-bottom: 1px solid var(--dl-border);
+  color: var(--dl-text);
+  font-family: var(--dl-font-title);
+  letter-spacing: 0.04em;
+}
+.application.dlshop .window-header .window-title { font-size: 1.15rem; }
+.application.dlshop .window-header .header-control { color: var(--dl-muted); }
+.application.dlshop .window-header .header-control:hover { color: var(--dl-accent); }
+
+.application.dlshop .window-content {
+  padding: 0;
+  background: var(--dl-bg);
+  color: var(--dl-text);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  scrollbar-color: var(--dl-border) var(--dl-bg);
+}
+
+.dlshop :is(h1, h2, h3) {
+  font-family: var(--dl-font-title);
+  border: none;
+  margin: 0;
+  color: inherit;
+}
+
+.dlshop .hint {
+  color: var(--dl-muted);
+  font-style: italic;
+  font-size: 0.9em;
+  margin: 0.25rem 0 0.5rem;
+}
+.dlshop .hint.warning { color: var(--dl-danger); font-style: normal; }
+
+/* --- Form controls ------------------------------------------------------- */
+
+.dlshop input:is([type="text"], [type="number"], [type="search"], [type="password"], [type="time"]),
+.dlshop select,
+.dlshop textarea,
+.dlshop file-picker input {
+  background: var(--dl-panel);
+  color: var(--dl-text);
+  border: 1px solid var(--dl-border);
+  border-radius: 3px;
+  font-family: var(--dl-font-body);
+  font-size: 0.95rem;
+  box-shadow: none;
+}
+.dlshop input:focus,
+.dlshop select:focus,
+.dlshop textarea:focus {
+  border-color: var(--dl-accent);
+  outline: 2px solid var(--dl-accent-soft);
+  outline-offset: 0;
+  box-shadow: none;
+}
+.dlshop input::placeholder,
+.dlshop textarea::placeholder { color: var(--dl-muted); opacity: 1; }
+.dlshop input[type="checkbox"] { accent-color: var(--dl-accent); }
+.dlshop select option { background: var(--dl-panel); color: var(--dl-text); }
+
+.dlshop .window-content button {
+  font-family: var(--dl-font-title);
+  color: var(--dl-text);
+  background: var(--dl-raised);
+  border: 1px solid var(--dl-border);
+  border-radius: 3px;
+  box-shadow: none;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.dlshop .window-content button:hover:not(:disabled) {
+  background: var(--dl-accent-soft);
+  border-color: var(--dl-accent);
+  color: var(--dl-accent);
+}
+.dlshop .window-content button:active:not(:disabled) { transform: translateY(1px); }
+.dlshop .window-content button:disabled { cursor: not-allowed; opacity: 0.45; }
+.dlshop .window-content button.danger { color: var(--dl-danger); }
+.dlshop .window-content button.danger:hover:not(:disabled) {
+  background: var(--dl-danger);
+  border-color: var(--dl-danger);
+  color: #fff;
+}
+
+.dlshop file-picker button { color: var(--dl-text); }
+
+/* --- Tabs (shared) ------------------------------------------------------- */
+
+.dlshop .dlshop-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.6rem 1rem 0;
+  border-bottom: 1px solid var(--dl-border);
+  flex: none;
+}
+.dlshop .window-content .dlshop-tabs button {
+  flex: 0 1 12rem;
+  margin-bottom: -1px;
+  padding: 0.4rem 1rem;
+  border-radius: 4px 4px 0 0;
+  background: transparent;
+  border-color: transparent;
+  color: var(--dl-muted);
+  font-size: 1.05rem;
+}
+.dlshop .window-content .dlshop-tabs button:hover:not(.active) { background: var(--dl-panel); color: var(--dl-text); border-color: transparent; }
+.dlshop .window-content .dlshop-tabs button.active {
+  background: var(--dl-bg);
+  border-color: var(--dl-border);
+  border-bottom-color: var(--dl-bg);
+  box-shadow: inset 0 2px 0 var(--dl-accent);
+  color: var(--dl-accent);
+}
+.dlshop .dlshop-tabs .count {
+  display: inline-block;
+  min-width: 1.4em;
+  padding: 0 0.3em;
+  margin-left: 0.25rem;
+  border-radius: 1em;
+  background: var(--dl-raised);
+  color: var(--dl-text);
+  font-size: 0.8em;
+}
+
+.dlshop .dlshop-empty {
+  list-style: none;
+  text-align: center;
+  font-style: italic;
+  color: var(--dl-muted);
+  padding: 2rem 1rem;
+}
+
+.dlshop .window-content .dlshop-add {
+  display: block;
+  margin: 0.75rem auto;
+  padding: 0.45rem 1.5rem;
+  font-size: 1.05rem;
+  background: var(--dl-accent-dark);
+  border-color: var(--dl-accent);
+  color: #fff;
+}
+.dlshop .window-content .dlshop-add:hover { background: var(--dl-accent); color: #fff; }
+
+/* ==========================================================================
+   Coins
+   ========================================================================== */
+
+.dl-coins {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+.dl-coins.free { font-style: italic; }
+.dl-coin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+.dl-coin::after {
+  content: "";
+  width: 0.8em;
+  height: 0.8em;
+  border-radius: 50%;
+  border: 1px solid rgb(0 0 0 / 0.45);
+  box-shadow: inset 0 -2px 2px rgb(0 0 0 / 0.3), inset 0 2px 2px rgb(255 255 255 / 0.45);
+}
+.dl-coin.gold::after { background: radial-gradient(circle at 35% 35%, #fff2b0, #e0b03c 55%, #8a6512); }
+.dl-coin.silver::after { background: radial-gradient(circle at 35% 35%, #ffffff, #c4c9cf 55%, #6d737a); }
+.dl-coin.bronze::after { background: radial-gradient(circle at 35% 35%, #f6c79a, #b46e35 55%, #5e3313); }
+
+/* Coin inputs: one small field per denomination */
+.dlshop-price-inputs {
+  display: inline-flex;
+  gap: 3px;
+}
+.dlshop .dlshop-price-inputs input.coin {
+  width: 3.6rem;
+  min-width: 0;
+  padding-right: 1.2rem;
+  text-align: right;
+  background-repeat: no-repeat;
+  background-position: right 0.3rem center;
+  background-size: 0.75rem 0.75rem;
+}
+.dlshop .dlshop-price-inputs input.coin.gold { background-image: radial-gradient(circle, #e0b03c 60%, #8a6512 66%, transparent 70%); }
+.dlshop .dlshop-price-inputs input.coin.silver { background-image: radial-gradient(circle, #c4c9cf 60%, #6d737a 66%, transparent 70%); }
+.dlshop .dlshop-price-inputs input.coin.bronze { background-image: radial-gradient(circle, #b46e35 60%, #5e3313 66%, transparent 70%); }
+.dlshop .dlshop-price-inputs input.coin::-webkit-inner-spin-button { display: none; }
+
+/* ==========================================================================
+   Shop window
+   ========================================================================== */
+
+.dlshop-window .dlshop-shop {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.dlshop-hero {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  min-height: 180px;
+  padding: 1.25rem 1.5rem;
+  background:
+    linear-gradient(180deg, rgb(27 31 34 / 0.2), rgb(27 31 34 / 0.85)),
+    var(--dlshop-bg, linear-gradient(135deg, #2b3338, #1b1f22)) center / cover no-repeat;
+  border-bottom: 1px solid var(--dl-border);
+  color: var(--dl-text);
+}
+
+.dlshop-keeper {
+  flex: none;
+  margin: 0;
+  text-align: center;
+}
+.dlshop-keeper img {
+  width: 116px;
+  height: 116px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid var(--dl-accent);
+  box-shadow: 0 4px 14px #000c;
+  background: var(--dl-panel);
+}
+.dlshop-keeper figcaption {
+  margin-top: 0.35rem;
+  font-family: var(--dl-font-title);
+  font-size: 0.95rem;
+  color: var(--dl-text);
+  text-shadow: 0 1px 3px #000;
+}
+
+.dlshop-titles {
+  flex: 1;
+  text-align: center;
+  text-shadow: 0 2px 4px #000, 0 0 12px #000a;
+}
+.dlshop-titles h1 {
+  font-size: 2.6rem;
+  line-height: 1.05;
+  color: #fff;
+  letter-spacing: 0.03em;
+}
+.dlshop-titles h2 {
+  margin-top: 0.2rem;
+  font-size: 1.2rem;
+  color: var(--dl-text);
+  letter-spacing: 0.12em;
+}
+.dlshop-flourish {
+  font-size: 1.4rem;
+  color: var(--dl-accent);
+  line-height: 1;
+  margin: 0.2rem 0;
+}
+.dlshop-slogan {
+  margin: 0;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--dl-text);
+}
+
+.dlshop .window-content .dlshop-manage {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  z-index: 1;
+}
+
+.dlshop-banner {
+  flex: none;
+  margin: 0;
+  padding: 0.3rem;
+  text-align: center;
+  background: var(--dl-danger);
+  color: #fff;
+  font-family: var(--dl-font-title);
+}
+
+.dlshop-desc {
+  flex: none;
+  max-height: 7.5rem;
+  overflow-y: auto;
+  padding: 0.75rem 1.5rem 0.25rem;
+  line-height: 1.4;
+}
+.dlshop-desc > p:first-child::first-letter {
+  float: left;
+  font-family: var(--dl-font-title);
+  font-size: 2.6em;
+  line-height: 0.85;
+  padding: 0.05em 0.1em 0 0;
+  color: var(--dl-accent);
+}
+.dlshop-desc p { margin: 0 0 0.5rem; }
+.dlshop-desc a { color: var(--dl-accent); }
+
+.dlshop-toolbar {
+  flex: none;
+  padding: 0.5rem 1rem;
+}
+.dlshop-searchbox {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--dl-muted);
+}
+.dlshop-searchbox input { flex: 1; }
+
+/* --- Item rows ----------------------------------------------------------- */
+
+.dlshop-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 0.4rem 1rem 0.75rem 1.2rem;
+}
+
+.dlshop-row {
+  display: grid;
+  grid-template-columns: 52px 1fr auto auto auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.45rem 0.6rem;
+  margin-bottom: 0.4rem;
+  background: var(--dl-panel);
+  border: 1px solid var(--dl-border);
+  border-left: 3px solid var(--dl-border);
+  border-radius: 4px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.dlshop-row:hover {
+  background: var(--dl-raised);
+  border-left-color: var(--dl-accent);
+}
+.dlshop-row[hidden] { display: none; }
+.dlshop-row.sold-out { opacity: 0.5; }
+.dlshop-row.gm-hidden { opacity: 0.6; border-left-style: dashed; }
+
+.dlshop-icon-wrap {
+  position: relative;
+  width: 48px;
+  height: 48px;
+}
+.dlshop-icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border: 1px solid var(--dl-border);
+  border-radius: 4px;
+  background: var(--dl-bg);
+}
+/* ribbon across the top-left corner */
+.dlshop-badge {
+  position: absolute;
+  top: -6px;
+  left: -8px;
+  max-width: 64px;
+  padding: 0 0.3rem;
+  font-family: var(--dl-font-title);
+  font-size: 0.65rem;
+  line-height: 1.35;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  color: #fff;
+  background: var(--dl-accent-dark);
+  border: 1px solid var(--dl-accent);
+  border-radius: 2px;
+  box-shadow: 0 1px 3px #0009;
+  transform: rotate(-12deg);
+}
+/* seal in the bottom-right corner */
+.dlshop-rank {
+  --rank: #37424a;
+  position: absolute;
+  right: -7px;
+  bottom: -7px;
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 3px;
+  font-family: var(--dl-font-title);
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--rank);
+  border: 1px solid rgb(255 255 255 / 0.35);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px #000a;
+  text-shadow: 0 1px 1px #000;
+}
+.dlshop-rank:is([data-rank="S" i], [data-rank="SS" i], [data-rank="SSS" i]) { --rank: #b8860b; }
+.dlshop-rank[data-rank="A" i] { --rank: #c0392b; }
+.dlshop-rank[data-rank="B" i] { --rank: #7b3fb0; }
+.dlshop-rank[data-rank="C" i] { --rank: #2d6fb5; }
+.dlshop-rank[data-rank="D" i] { --rank: #3f8a3a; }
+.dlshop-rank:is([data-rank="E" i], [data-rank="F" i]) { --rank: #5f6a72; }
+
+.dlshop-name {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.dlshop-name > span {
+  font-family: var(--dl-font-title);
+  font-size: 1.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dlshop-name small { color: var(--dl-muted); font-style: italic; }
+
+.dlshop-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.1rem;
+  font-family: var(--dl-font-title);
+  font-size: 1.1rem;
+  color: var(--dl-text);
+  white-space: nowrap;
+}
+.dlshop-price.dear { color: var(--dl-danger); }
+.dlshop-each {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: var(--dl-font-body);
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--dl-muted);
+}
+.dlshop-each .dl-coins { gap: 0.3rem; }
+
+.dlshop-qty {
+  display: flex;
+  align-items: center;
+}
+.dlshop .dlshop-qty input {
+  width: 3rem;
+  height: 28px;
+  text-align: center;
+  border-radius: 0;
+}
+.dlshop .window-content .dlshop-qty button {
+  width: 26px;
+  height: 28px;
+  padding: 0;
+  line-height: 1;
+  font-size: 1.1rem;
+}
+.dlshop .window-content .dlshop-qty button:first-child { border-radius: 3px 0 0 3px; }
+.dlshop .window-content .dlshop-qty button:last-child { border-radius: 0 3px 3px 0; }
+
+.dlshop .window-content .dlshop-deal {
+  min-width: 5rem;
+  height: 32px;
+  font-size: 1.05rem;
+  background: var(--dl-accent-dark);
+  border-color: var(--dl-accent);
+  color: #fff;
+}
+.dlshop .window-content .dlshop-deal:hover:not(:disabled) { background: var(--dl-accent); color: #fff; }
+
+/* --- Purse footer -------------------------------------------------------- */
+
+.dlshop-purse {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1.25rem;
+  background: var(--dl-panel);
+  border-top: 1px solid var(--dl-border);
+  color: var(--dl-text);
+  font-family: var(--dl-font-title);
+}
+.dlshop-purse img {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border: 1px solid var(--dl-border);
+  border-radius: 50%;
+}
+.dlshop-customer { flex: 1; font-size: 1.1rem; }
+.dlshop-coins { font-size: 1.25rem; gap: 0.8rem; color: #fff; }
+
+/* ==========================================================================
+   Manager
+   ========================================================================== */
+
+.dlshop-manager-root {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.dlshop-manager .dlshop-manager-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.75rem 1rem;
+}
+
+/* --- Shop list ----------------------------------------------------------- */
+
+.dlshop-cards { list-style: none; margin: 0; padding: 0; }
+.dlshop-card {
+  display: flex;
+  align-items: stretch;
+  margin-bottom: 0.6rem;
+  border: 1px solid var(--dl-border);
+  border-left: 3px solid var(--dl-accent);
+  border-radius: 4px;
+  background: var(--dl-panel);
+  overflow: hidden;
+}
+.dlshop-card.closed { border-left-color: var(--dl-danger); }
+.dlshop-card-art {
+  flex: 0 0 88px;
+  display: grid;
+  place-items: center;
+  background: var(--dl-raised) center / cover;
+}
+.dlshop-card-art img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid var(--dl-border);
+  background: var(--dl-bg);
+  box-shadow: 0 2px 6px #000a;
+}
+.dlshop-card-text { flex: 1; padding: 0.45rem 0.75rem; min-width: 0; color: inherit; cursor: pointer; }
+.dlshop-card-text:hover h3 { color: var(--dl-accent); text-shadow: none; }
+.dlshop-card-text h3 { font-size: 1.35rem; }
+.dlshop-card-text .sub { margin: 0; font-style: italic; color: var(--dl-muted); }
+.dlshop-card-text .meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin: 0.25rem 0 0;
+  font-size: 0.9em;
+  color: var(--dl-muted);
+}
+.dlshop-card-text .closed-tag { color: var(--dl-danger); }
+.dlshop-card-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 30px);
+  gap: 4px;
+  align-content: center;
+  padding: 0.4rem;
+}
+.dlshop .window-content .dlshop-card-actions button { width: 30px; height: 30px; padding: 0; }
+
+/* --- One shop: header and panes ------------------------------------------ */
+
+.dlshop-manager-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem 0;
+}
+.dlshop-manager-head h2 {
+  flex: 1;
+  font-size: 1.6rem;
+  color: var(--dl-text);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dlshop .window-content .dlshop-manager-head button { flex: none; padding: 0.3rem 0.7rem; }
+
+.dlshop-manager .dlshop-pane { display: none; }
+.dlshop-manager .dlshop-pane.active { display: block; }
+
+.dlshop-manager fieldset {
+  margin: 0 0 0.9rem;
+  padding: 0.5rem 0.9rem 0.75rem;
+  border: 1px solid var(--dl-border);
+  border-radius: 4px;
+  background: var(--dl-panel);
+}
+.dlshop-manager legend {
+  padding: 0 0.5rem;
+  font-family: var(--dl-font-title);
+  font-size: 1.15rem;
+  color: var(--dl-accent);
+}
+.dlshop-manager .form-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.25rem 0.75rem;
+  margin: 0.35rem 0;
+}
+.dlshop-manager .form-group > label {
+  flex: 0 0 13rem;
+  font-family: var(--dl-font-title);
+  color: var(--dl-text);
+}
+.dlshop-manager .form-group > :is(input:not([type="checkbox"]), select, file-picker) { flex: 1; }
+.dlshop-manager .form-group > .hint { flex: 0 0 100%; margin: 0; }
+.dlshop-manager .form-group.stacked { flex-direction: column; align-items: stretch; }
+.dlshop-manager .form-group.stacked > label { flex: none; }
+.dlshop-manager textarea { min-height: 6rem; resize: vertical; }
+.dlshop-manager fieldset :is(input:is([type="text"], [type="number"]), select, textarea, file-picker input) {
+  background: var(--dl-bg);
+}
+
+.dlshop-keeper-pick {
+  display: flex;
+  gap: 0.9rem;
+  align-items: center;
+  padding: 0.4rem;
+  border: 1px dashed transparent;
+  border-radius: 4px;
+}
+.dlshop-keeper-pick.drag-over { border-color: var(--dl-accent); background: var(--dl-accent-soft); }
+.dlshop-keeper-pick img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid var(--dl-border);
+  background: var(--dl-bg);
+}
+.dlshop-keeper-pick > div { flex: 1; }
+.dlshop-keeper-pick select { width: 100%; }
+.dlshop .window-content .dlshop-keeper-pick > button { width: 40px; height: 40px; padding: 0; font-size: 1.1rem; }
+
+.dlshop-manager .dlshop-vague { margin: 0 0 0.75rem; }
+
+/* --- Add by UUID --------------------------------------------------------- */
+
+.dlshop-uuid {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  color: var(--dl-muted);
+}
+.dlshop-uuid input { flex: 1; font-family: var(--font-monospace, monospace); font-size: 0.85rem; }
+.dlshop .window-content .dlshop-uuid button { flex: none; padding: 0.3rem 0.9rem; }
+
+/* --- Stock / buy tables -------------------------------------------------- */
+
+.dlshop-table {
+  display: grid;
+  border: 1px solid var(--dl-border);
+  border-radius: 4px;
+  background: var(--dl-panel);
+}
+.dlshop-table.drag-over { outline: 2px dashed var(--dl-accent); outline-offset: 2px; }
+/* Item | Price (3 coins) | Qty | Infinite | Enabled | Badge | Rank | buttons */
+.dlshop-table.stock { grid-template-columns: minmax(9rem, 1fr) auto 4rem auto auto 4.5rem 3.5rem auto; }
+/* When | Type | Item | Qty | Total | Customer */
+.dlshop-table.history { grid-template-columns: auto auto minmax(8rem, 1fr) auto auto auto; }
+/* Item | Pays (3 coins) | buttons */
+.dlshop-table.wants { grid-template-columns: minmax(9rem, 1fr) auto auto; }
+
+.dlshop-table-head,
+.dlshop-table-row {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  align-items: center;
+  column-gap: 0.6rem;
+  padding: 0.4rem 0.6rem;
+}
+.dlshop-table > .dlshop-dropzone { grid-column: 1 / -1; }
+
+.dlshop-table-head {
+  font-family: var(--dl-font-title);
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  text-transform: uppercase;
+  color: var(--dl-muted);
+  background: var(--dl-raised);
+  border-bottom: 1px solid var(--dl-border);
+}
+.dlshop-table-head > span:not(:first-child) { text-align: center; }
+.dlshop-table-row { border-bottom: 1px solid var(--dl-border); }
+.dlshop-table-row:hover { background: var(--dl-raised); }
+.dlshop-table-row.disabled { opacity: 0.55; }
+.dlshop-table-row input[type="checkbox"] { justify-self: center; width: 18px; height: 18px; margin: 0; }
+.dlshop-table-row input[type="number"],
+.dlshop-table-row input[type="text"] { width: 100%; height: 30px; background: var(--dl-bg); }
+.dlshop .dlshop-table-row .dlshop-price-inputs input.coin { background-color: var(--dl-bg); }
+.dlshop-table-row input[name$=".badge"],
+.dlshop-table-row input[name$=".rank"] { text-transform: uppercase; text-align: center; }
+.dlshop-table-row input:disabled { opacity: 0.45; }
+
+.dlshop-cell-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+.dlshop-cell-item img {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border: 1px solid var(--dl-border);
+  border-radius: 3px;
+  background: var(--dl-bg);
+}
+.dlshop-cell-item .name {
+  font-family: var(--dl-font-title);
+  font-size: 1.05rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dlshop-row-buttons { display: flex; gap: 4px; }
+.dlshop .window-content .dlshop-row-buttons button.icon { width: 30px; height: 30px; padding: 0; }
+
+.dlshop-dropzone {
+  margin: 0.5rem;
+  padding: 1rem;
+  text-align: center;
+  font-style: italic;
+  color: var(--dl-muted);
+  border: 1px dashed var(--dl-border);
+  border-radius: 4px;
+}
+.dlshop-table.drag-over .dlshop-dropzone {
+  border-color: var(--dl-accent);
+  color: var(--dl-accent);
+  background: var(--dl-accent-soft);
+}
+
+/* ==========================================================================
+   Trade prompt (fixed above the shopkeeper's head)
+   ========================================================================== */
+
+#dlshop-prompt {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 70;
+  display: none;
+  align-items: center;
+  gap: 0.45rem;
+  transform: translate(-50%, calc(-100% - 8px));
+  pointer-events: none;
+  font-family: var(--dl-font-title);
+  font-size: 1.1rem;
+  white-space: nowrap;
+  color: #fff;
+  text-shadow: 0 0 3px #000, 0 1px 2px #000, 0 0 8px #000;
+  background: transparent;
+}
+#dlshop-prompt.visible { display: flex; }
+#dlshop-prompt kbd {
+  min-width: 1.7rem;
+  padding: 0.05rem 0.4rem;
+  text-align: center;
+  font-family: var(--dl-font-title);
+  color: #fff;
+  text-shadow: none;
+  background: var(--dl-accent-dark);
+  border: 1px solid var(--dl-accent);
+  border-radius: 4px;
+  box-shadow: 0 2px 0 #000a;
+}
+
+/* ==========================================================================
+   Coin row on actor sheets
+   ========================================================================== */
+
+.dlshop-sheet-purse {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin: 0.5rem 0;
+  padding: 0.4rem 0.75rem 0.6rem;
+  border: 1px solid rgb(127 127 127 / 0.45);
+  border-radius: 6px;
+}
+.dlshop-sheet-coin {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex: 1 1 8rem;
+}
+.dlshop-sheet-coin-icon {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid rgb(0 0 0 / 0.5);
+  box-shadow: inset 0 -2px 2px rgb(0 0 0 / 0.3), inset 0 2px 2px rgb(255 255 255 / 0.45);
+}
+.dlshop-sheet-coin.gold .dlshop-sheet-coin-icon { background: radial-gradient(circle at 35% 35%, #fff2b0, #e0b03c 55%, #8a6512); }
+.dlshop-sheet-coin.silver .dlshop-sheet-coin-icon { background: radial-gradient(circle at 35% 35%, #ffffff, #c4c9cf 55%, #6d737a); }
+.dlshop-sheet-coin.bronze .dlshop-sheet-coin-icon { background: radial-gradient(circle at 35% 35%, #f6c79a, #b46e35 55%, #5e3313); }
+.dlshop-sheet-coin-name { white-space: nowrap; }
+.dlshop-sheet-purse .dlshop-sheet-coin input {
+  flex: 1;
+  min-width: 3.5rem;
+  height: 32px;
+  padding: 6px 8px;
+  text-align: right;
+  color: #fff;
+  background: #23292d;
+  border: 1px solid #37424a;
+  border-radius: 3px;
+}
+.dlshop-sheet-purse .dlshop-sheet-coin input:disabled { color: #fff; background: transparent; border-color: transparent; }
+
+/* ==========================================================================
+   Item sheet
+   ========================================================================== */
+
+.dlshop-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+}
+.dlshop-item-img {
+  flex: none;
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  border: 1px solid var(--dl-border);
+  border-radius: 4px;
+  background: var(--dl-panel);
+  cursor: pointer;
+}
+.dlshop-item-img[data-action]:hover { border-color: var(--dl-accent); }
+.dlshop-item-fields { flex: 1; display: flex; flex-direction: column; gap: 0.6rem; }
+.dlshop-item-fields .form-group { display: flex; flex-direction: column; gap: 0.2rem; }
+.dlshop-item-fields label { font-family: var(--dl-font-title); font-size: 1rem; color: var(--dl-muted); }
+.dlshop-item-fields input { width: 100%; height: 32px; }
+.dlshop-item-fields input[name="name"] { font-family: var(--dl-font-title); font-size: 1.2rem; }
+
+/* --- Opening hours and history ------------------------------------------ */
+
+.dlshop-manager .dlshop-hours input[type="time"] { flex: 0 0 7.5rem; height: 30px; background: var(--dl-bg); }
+.dlshop-manager .dlshop-hours input[type="time"]:disabled { opacity: 0.45; }
+.dlshop-hours-state { color: var(--dl-accent); font-family: var(--dl-font-title); }
+.dlshop-hours-state.closed { color: var(--dl-danger); }
+.dlshop-hours-line { margin: 0.25rem 0 0; font-size: 0.95rem; color: var(--dl-text); }
+
+.dlshop-history-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+.dlshop .window-content .dlshop-history-tools button { height: 28px; padding: 0 0.8rem; }
+.dlshop-history-when { color: var(--dl-muted); font-size: 0.85rem; white-space: nowrap; }
+.dlshop-history-type { white-space: nowrap; font-family: var(--dl-font-title); }
+.dlshop-history-type.buy { color: var(--dl-accent); }
+.dlshop-history-type.sell { color: #d08a2c; }
+.dlshop-history-qty { text-align: center; }
+.dlshop-history-who { display: flex; flex-direction: column; white-space: nowrap; }
+.dlshop-history-who small { color: var(--dl-muted); }
+.dlshop-table.history .dlshop-table-head > span:nth-child(3) { text-align: left; }
+
+/* ==========================================================================
+   DogmaLiter connection
+   ========================================================================== */
+
+.dlshop-dl {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.9rem 1rem;
+}
+.dlshop-dl-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--dl-border);
+  border-left: 3px solid var(--dl-danger);
+  border-radius: 4px;
+  background: var(--dl-panel);
+  font-family: var(--dl-font-title);
+  font-size: 1.05rem;
+}
+.dlshop-dl-status.online { border-left-color: var(--dl-accent); }
+.dlshop-dl-status i { color: var(--dl-danger); }
+.dlshop-dl-status.online i { color: var(--dl-accent); }
+.dlshop-dl .form-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin: 0.45rem 0 0.15rem;
+}
+.dlshop-dl .form-group > label { flex: 0 0 11rem; font-family: var(--dl-font-title); }
+.dlshop-dl .form-group > :is(input, select) { flex: 1; height: 32px; }
+.dlshop .window-content .dlshop-dl .form-group > button.icon { flex: none; width: 32px; height: 32px; padding: 0; }
+.dlshop-dl-status > span { flex: 1; }
+.dlshop .window-content .dlshop-dl-status button { height: 28px; padding: 0 0.6rem; font-size: 0.9rem; }
+.dlshop .window-content .dlshop-dl-status button.icon { width: 28px; padding: 0; }
+.dlshop-dl fieldset {
+  margin: 0.75rem 0 0;
+  padding: 0.5rem 0.8rem 0.7rem;
+  border: 1px solid var(--dl-border);
+  border-radius: 4px;
+  background: var(--dl-panel);
+}
+.dlshop-dl legend { padding: 0 0.4rem; font-family: var(--dl-font-title); font-size: 1.1rem; color: var(--dl-accent); }
+.dlshop-dl fieldset :is(input:is([type="text"]), select) { background: var(--dl-bg); }
+.dlshop-dl-actor-img {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border: 1px solid var(--dl-border);
+  border-radius: 50%;
+}
+.dlshop-dl-check { display: flex; align-items: center; gap: 0.4rem; margin: 0.4rem 0; }
+.dlshop-dl-characters {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dlshop-dl-character {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0.4rem;
+  padding: 0.4rem 0.5rem;
+  background: var(--dl-bg);
+  border: 1px solid var(--dl-border);
+  border-left: 3px solid var(--dl-border);
+  border-radius: 4px;
+}
+.dlshop-dl-character:hover { border-left-color: var(--dl-accent); }
+.dlshop-dl-character.linked { border-left-color: var(--dl-accent); background: var(--dl-accent-soft); }
+.dlshop-dl-character > img,
+.dlshop-dl-noportrait {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border: 1px solid var(--dl-border);
+  border-radius: 50%;
+  background: var(--dl-panel);
+}
+.dlshop-dl-noportrait { display: grid; place-items: center; color: var(--dl-muted); }
+.dlshop-dl-character-text { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.dlshop-dl-character-text strong { font-family: var(--dl-font-title); font-size: 1.1rem; font-weight: normal; }
+.dlshop-dl-character-text small { color: var(--dl-muted); }
+.dlshop-dl-linkedto { color: var(--dl-accent) !important; }
+.dlshop-dl-badge { color: var(--dl-accent); font-family: var(--dl-font-title); white-space: nowrap; }
+.dlshop .window-content .dlshop-dl-character .dlshop-deal { min-width: 0; height: 30px; padding: 0 0.8rem; }
+.dlshop-dl-links { list-style: none; margin: 0; padding: 0; }
+.dlshop-dl-links li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid var(--dl-border);
+}
+.dlshop-dl-links li:last-child { border-bottom: none; }
+.dlshop-dl-links img { width: 30px; height: 30px; object-fit: cover; border-radius: 50%; border: 1px solid var(--dl-border); }
+.dlshop-dl-links .name { font-family: var(--dl-font-title); }
+.dlshop-dl-links .name small { color: var(--dl-muted); font-family: var(--dl-font-body); }
+.dlshop-dl-links i.fa-arrow-right-long { color: var(--dl-muted); }
+.dlshop .window-content .dlshop-dl-links button { margin-left: auto; width: 28px; height: 28px; padding: 0; }
+.dlshop-dl-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+}
+.dlshop .window-content .dlshop-dl-buttons button { min-width: 8rem; height: 34px; padding: 0 1rem; }
+
+/* ==========================================================================
+   DogmaLiter import
+   ========================================================================== */
+
+.dlshop-dli {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem 1rem;
+  gap: 0.4rem;
+}
+.dlshop-dli-toolbar { display: flex; gap: 0.5rem; }
+.dlshop-dli-toolbar .dlshop-searchbox { flex: 1; }
+.dlshop-dli-toolbar select { flex: 0 0 11rem; height: 32px; }
+.dlshop-dli-toolbar input { height: 32px; }
+.dlshop-dli .hint { margin: 0; }
+.dlshop-dli-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--dl-border);
+  border-radius: 4px;
+  background: var(--dl-panel);
+}
+.dlshop-dli-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.35rem 0.6rem;
+  border-bottom: 1px solid var(--dl-border);
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  user-select: none;
+}
+.dlshop-dli-row:hover { background: var(--dl-raised); }
+.dlshop-dli-row.selected { background: var(--dl-accent-soft); border-left-color: var(--dl-accent); }
+.dlshop-dli-check { color: var(--dl-muted); font-size: 1.1rem; }
+.dlshop-dli-row.selected .dlshop-dli-check { color: var(--dl-accent); }
+.dlshop-dli-row img {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border: 1px solid var(--dl-border);
+  border-radius: 3px;
+  background: var(--dl-bg);
+}
+.dlshop-dli-text { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.dlshop-dli-text strong { font-family: var(--dl-font-title); font-size: 1.1rem; font-weight: normal; }
+.dlshop-dli-text small { color: var(--dl-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dlshop-dli-rarity { text-transform: capitalize; }
+.dlshop-dli-rarity[data-rarity="uncommon"] { color: #3f8a3a; }
+.dlshop-dli-rarity[data-rarity="rare"] { color: #2d6fb5; }
+.dlshop-dli-rarity[data-rarity="epic"] { color: #9b59d0; }
+.dlshop-dli-rarity[data-rarity="masterwork"] { color: #d08a2c; }
+.dlshop-dli-rarity[data-rarity="legendary"] { color: #e0b03c; }
+.dlshop-dli-rarity[data-rarity="unique"] { color: var(--dl-danger); }
+.dlshop-dli-in { color: var(--dl-accent); font-family: var(--dl-font-title); white-space: nowrap; }
+.dlshop-dli-pages { display: flex; align-items: center; gap: 0.4rem; }
+.dlshop-dli-pages .spacer { flex: 1; }
+.dlshop .window-content .dlshop-dli-pages button { height: 28px; padding: 0 0.6rem; }
+.dlshop-dli-footer {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--dl-border);
+}
+.dlshop-dli-footer label { display: flex; flex-direction: column; gap: 0.15rem; flex: 1; color: var(--dl-muted); font-family: var(--dl-font-title); }
+.dlshop-dli-footer select { height: 32px; }
+.dlshop .window-content .dlshop-dli-footer .dlshop-deal { flex: 0 0 auto; height: 34px; padding: 0 1rem; }
+.dlshop-dli-notready { margin: auto; text-align: center; color: var(--dl-muted); }
+.dlshop .window-content .dlshop-dli-notready .dlshop-deal { padding: 0 1rem; height: 34px; }
+
+/* ==========================================================================
+   GM approval cards (bottom-left)
+   ========================================================================== */
+
+.dlshop-approvals {
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 320px;
+  pointer-events: none;
+}
+.dlshop-approval {
+  pointer-events: auto;
+  overflow: hidden;
+  color: var(--dl-text);
+  font-family: var(--dl-font-body);
+  background: var(--dl-bg);
+  border: 1px solid var(--dl-border);
+  border-left: 3px solid var(--dl-accent);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px #000c;
+  animation: dlshop-approval-in 0.2s ease-out;
+}
+.dlshop-approval.closing { opacity: 0; transform: translateX(-12px); transition: opacity 0.2s, transform 0.2s; }
+@keyframes dlshop-approval-in {
+  from { opacity: 0; transform: translateX(-12px); }
+  to { opacity: 1; transform: none; }
+}
+.dlshop-approval header {
+  padding: 0.4rem 0.7rem;
+  background: var(--dl-panel);
+  border-bottom: 1px solid var(--dl-border);
+  color: var(--dl-accent);
+  font-family: var(--dl-font-title);
+  font-size: 1.05rem;
+}
+.dlshop-approval-body {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.6rem 0.7rem;
+}
+.dlshop-approval-body img {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  border: 1px solid var(--dl-border);
+  border-radius: 4px;
+  background: var(--dl-panel);
+}
+.dlshop-approval-body p { margin: 0; font-size: 0.95rem; line-height: 1.35; }
+.dlshop-approval footer {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 0.7rem 0.7rem;
+}
+.dlshop-approval footer button {
+  flex: 1;
+  height: 30px;
+  font-family: var(--dl-font-title);
+  font-size: 1rem;
+  color: #fff;
+  border-radius: 3px;
+  cursor: pointer;
+}
+.dlshop-approval footer .approve { background: var(--dl-accent-dark); border: 1px solid var(--dl-accent); }
+.dlshop-approval footer .approve:hover { background: var(--dl-accent); }
+.dlshop-approval footer .decline { background: var(--dl-raised); border: 1px solid var(--dl-border); color: var(--dl-danger); }
+.dlshop-approval footer .decline:hover { background: var(--dl-danger); border-color: var(--dl-danger); color: #fff; }
+
+/* Actors sidebar buttons */
+.dlshop-dir-buttons { display: flex; gap: 4px; flex: 0 0 100%; }
+.dlshop-dir-buttons button { flex: 1; }

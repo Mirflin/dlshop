@@ -1,0 +1,66 @@
+<div class="dlshop-dli">
+  {{#if ready}}
+  <div class="dlshop-dli-toolbar">
+    <label class="dlshop-searchbox">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input type="search" name="search" value="{{search}}" placeholder="{{localize 'DLSHOP.DLImport.Search'}}">
+    </label>
+    <select name="tag">
+      {{selectOptions tagOptions selected=tag blank=(localize "DLSHOP.DLImport.AllTags")}}
+    </select>
+    <select name="slot">
+      {{selectOptions slotOptions selected=slot blank=(localize "DLSHOP.DLImport.AllSlots")}}
+    </select>
+    <select name="rarity">
+      {{selectOptions rarityOptions selected=rarity blank=(localize "DLSHOP.DLImport.AllRarities")}}
+    </select>
+  </div>
+  <p class="hint">{{localize "DLSHOP.DLImport.Hint" game=conn.gameTitle total=totalItems}}</p>
+  <p class="hint">{{localize "DLSHOP.DLImport.ImagesTo" folder=imageFolder}}</p>
+  {{#if error}}<p class="hint warning"><i class="fa-solid fa-triangle-exclamation"></i> {{error}}</p>{{/if}}
+
+  <ol class="dlshop-dli-list">
+    {{#each items}}
+    <li class="dlshop-dli-row {{#if selected}}selected{{/if}}" data-item-id="{{id}}" data-action="toggle">
+      <span class="dlshop-dli-check"><i class="fa-{{#if selected}}solid fa-square-check{{else}}regular fa-square{{/if}}"></i></span>
+      <img src="{{img}}" alt="">
+      <span class="dlshop-dli-text">
+        <strong>{{name}}</strong>
+        <small><span class="dlshop-dli-rarity" data-rarity="{{rarity}}">{{rarity}}</span> · {{category}}{{#if tags}} · {{tags}}{{/if}}</small>
+      </span>
+      {{#if inFoundry}}<span class="dlshop-dli-in" data-tooltip="DLSHOP.DLImport.InFoundryHint"><i class="fa-solid fa-check"></i> {{localize "DLSHOP.DLImport.InFoundry"}}</span>{{/if}}
+    </li>
+    {{else}}
+    <li class="dlshop-empty">{{localize "DLSHOP.DLImport.NoItems"}}</li>
+    {{/each}}
+  </ol>
+
+  <div class="dlshop-dli-pages">
+    <button type="button" data-action="page" data-step="-1" {{disabled (not hasPrev)}}><i class="fa-solid fa-chevron-left"></i></button>
+    <span>{{localize "DLSHOP.DLImport.Page" page=page total=totalPages}}</span>
+    <button type="button" data-action="page" data-step="1" {{disabled (not hasNext)}}><i class="fa-solid fa-chevron-right"></i></button>
+    <span class="spacer"></span>
+    <button type="button" data-action="selectPage">{{localize "DLSHOP.DLImport.SelectPage"}}</button>
+    <button type="button" data-action="clearSelection" {{disabled (not selectedCount)}}>{{localize "DLSHOP.DLImport.Clear"}}</button>
+  </div>
+
+  <footer class="dlshop-dli-footer">
+    <label>{{localize "DLSHOP.DLImport.Type"}}
+      <select name="type">{{selectOptions typeOptions selected=type}}</select>
+    </label>
+    <label>{{localize "DLSHOP.DLImport.Folder"}}
+      <select name="folder">{{selectOptions folderOptions selected=folder blank=(localize "DLSHOP.DLImport.NoFolder")}}</select>
+    </label>
+    <button type="button" class="dlshop-deal" data-action="import" {{disabled (or busy (not selectedCount))}}>
+      <i class="fa-solid {{#if busy}}fa-spinner fa-spin{{else}}fa-cloud-arrow-down{{/if}}"></i>
+      {{localize "DLSHOP.DLImport.Import" n=selectedCount}}
+    </button>
+  </footer>
+
+  {{else}}
+  <div class="dlshop-dli-notready">
+    <p>{{#if conn.loggedIn}}{{localize "DLSHOP.DLImport.NoGame"}}{{else}}{{localize "DLSHOP.DLImport.NotLoggedIn"}}{{/if}}</p>
+    <button type="button" class="dlshop-deal" data-action="login"><i class="fa-solid fa-link"></i> {{localize "DLSHOP.DL.Title"}}</button>
+  </div>
+  {{/if}}
+</div>

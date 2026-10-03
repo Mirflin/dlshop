@@ -1,0 +1,274 @@
+<div class="dlshop-manager-root">
+{{#if (eq view "shop")}}
+{{!-- ===================== One shop ===================== --}}
+<header class="dlshop-manager-head" data-shop-id="{{shop.id}}">
+  <button type="button" data-action="view" data-view="list"><i class="fa-solid fa-arrow-left"></i> {{localize "DLSHOP.AllShops"}}</button>
+  <h2>{{shop.name}}</h2>
+  <button type="button" data-action="open" data-tooltip="DLSHOP.Preview"><i class="fa-solid fa-eye"></i></button>
+  <button type="button" data-action="toggle" data-tooltip="{{#if shop.open}}DLSHOP.CloseShop{{else}}DLSHOP.OpenShop{{/if}}">
+    <i class="fa-solid {{#if shop.open}}fa-door-open{{else}}fa-door-closed{{/if}}"></i>
+  </button>
+</header>
+
+<nav class="dlshop-tabs">
+  <button type="button" class="{{#if (eq tab 'details')}}active{{/if}}" data-action="shopTab" data-tab="details">
+    <i class="fa-solid fa-scroll"></i> {{localize "DLSHOP.TabDetails"}}
+  </button>
+  <button type="button" class="{{#if (eq tab 'stock')}}active{{/if}}" data-action="shopTab" data-tab="stock">
+    <i class="fa-solid fa-boxes-stacked"></i> {{localize "DLSHOP.TabStock"}} <span class="count">{{wares.length}}</span>
+  </button>
+  <button type="button" class="{{#if (eq tab 'buys')}}active{{/if}}" data-action="shopTab" data-tab="buys">
+    <i class="fa-solid fa-hand-holding-dollar"></i> {{localize "DLSHOP.TabWants"}} <span class="count">{{wants.length}}</span>
+  </button>
+  <button type="button" class="{{#if (eq tab 'history')}}active{{/if}}" data-action="shopTab" data-tab="history">
+    <i class="fa-solid fa-clock-rotate-left"></i> {{localize "DLSHOP.TabHistory"}} <span class="count">{{history.length}}</span>
+  </button>
+</nav>
+
+<div class="dlshop-manager-body">
+
+  {{!-- Signboard --}}
+  <section class="dlshop-pane {{#if (eq tab 'details')}}active{{/if}}">
+    <fieldset>
+      <legend>{{localize "DLSHOP.Signboard"}}</legend>
+      <div class="form-group">
+        <label>{{localize "DLSHOP.Field.Name"}}</label>
+        <input type="text" name="name" value="{{shop.name}}" required>
+      </div>
+      <div class="form-group">
+        <label>{{localize "DLSHOP.Field.Subtitle"}}</label>
+        <input type="text" name="subtitle" value="{{shop.subtitle}}" placeholder="{{localize 'DLSHOP.Field.SubtitleHint'}}">
+      </div>
+      <div class="form-group">
+        <label>{{localize "DLSHOP.Field.Slogan"}}</label>
+        <input type="text" name="slogan" value="{{shop.slogan}}" placeholder="{{localize 'DLSHOP.Field.SloganHint'}}">
+      </div>
+      <div class="form-group stacked">
+        <label>{{localize "DLSHOP.Field.Description"}}</label>
+        <textarea name="description" rows="5">{{shop.description}}</textarea>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>{{localize "DLSHOP.Keeper"}}</legend>
+      <div class="dlshop-keeper-pick" data-drop="keeper">
+        <img src="{{#if keeper}}{{keeper.img}}{{else}}icons/svg/mystery-man.svg{{/if}}" alt="">
+        <div>
+          <select name="actorId">
+            {{selectOptions actorOptions selected=shop.actorId blank=(localize "DLSHOP.NoKeeper")}}
+          </select>
+          <p class="hint">{{localize "DLSHOP.KeeperHint"}}</p>
+          {{#if keeperTaken}}<p class="hint warning"><i class="fa-solid fa-triangle-exclamation"></i> {{localize "DLSHOP.KeeperTaken"}}</p>{{/if}}
+        </div>
+        <button type="button" data-action="place" data-tooltip="DLSHOP.PlaceKeeper" {{disabled (or (not keeper) (not hasScene))}}>
+          <i class="fa-solid fa-street-view"></i>
+        </button>
+      </div>
+      <div class="form-group">
+        <label>{{localize "DLSHOP.Field.Range"}}</label>
+        <input type="number" name="range" value="{{shop.range}}" min="0" step="0.5">
+        <p class="hint">{{localize "DLSHOP.Field.RangeHint"}}</p>
+      </div>
+      <div class="form-group">
+        <label>{{localize "DLSHOP.Field.Open"}}</label>
+        <input type="checkbox" name="open" {{checked shop.open}}>
+      </div>
+      <div class="form-group dlshop-hours">
+        <label>{{localize "DLSHOP.Field.Hours"}}</label>
+        <input type="checkbox" name="hours.enabled" {{checked shop.hours.enabled}} data-tooltip="DLSHOP.Field.HoursToggle">
+        <input type="time" name="hours.from" value="{{shop.hours.from}}" {{disabled (not shop.hours.enabled)}}>
+        <span>–</span>
+        <input type="time" name="hours.to" value="{{shop.hours.to}}" {{disabled (not shop.hours.enabled)}}>
+        {{#if shop.hours.enabled}}
+        <span class="dlshop-hours-state {{#if outsideHours}}closed{{/if}}">
+          {{#if outsideHours}}{{localize "DLSHOP.Field.HoursClosedNow"}}{{else}}{{localize "DLSHOP.Field.HoursOpenNow"}}{{/if}}
+        </span>
+        {{/if}}
+        <p class="hint">{{localize "DLSHOP.Field.HoursHint"}}</p>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>{{localize "DLSHOP.Ambience"}}</legend>
+      <div class="form-group">
+        <label>{{localize "DLSHOP.Field.Background"}}</label>
+        <file-picker name="background" type="image" value="{{shop.background}}"></file-picker>
+      </div>
+      <div class="form-group">
+        <label>{{localize "DLSHOP.Field.Music"}}</label>
+        <file-picker name="music" type="audio" value="{{shop.music}}"></file-picker>
+        <p class="hint">{{localize "DLSHOP.Field.MusicHint"}}</p>
+      </div>
+      <div class="form-group">
+        <label>{{localize "DLSHOP.Field.Greeting"}}</label>
+        <file-picker name="greeting" type="audio" value="{{shop.greeting}}"></file-picker>
+        <p class="hint">{{localize "DLSHOP.Field.GreetingHint"}}</p>
+      </div>
+      <div class="form-group">
+        <label>{{localize "DLSHOP.Field.Volume"}}</label>
+        <input type="number" name="volumePercent" value="{{volumePercent}}" min="0" max="100" step="5">
+      </div>
+    </fieldset>
+  </section>
+
+  {{!-- Stock --}}
+  <section class="dlshop-pane {{#if (eq tab 'stock')}}active{{/if}}">
+    <div class="form-group dlshop-vague">
+      <label>{{localize "DLSHOP.Field.VagueStock"}}</label>
+      <input type="checkbox" name="vagueStock" {{checked shop.vagueStock}}>
+      <p class="hint">{{localize "DLSHOP.Field.VagueStockHint"}}</p>
+    </div>
+    <div class="dlshop-uuid">
+      <i class="fa-solid fa-link"></i>
+      <input type="text" class="dlshop-uuid-input" placeholder="{{localize 'DLSHOP.UuidPlaceholder'}}" spellcheck="false">
+      <button type="button" data-action="addUuid"><i class="fa-solid fa-plus"></i> {{localize "DLSHOP.AddByUuid"}}</button>
+    </div>
+    <div class="dlshop-table stock" data-drop="stock">
+      <div class="dlshop-table-head">
+        <span>{{localize "DLSHOP.Item"}}</span>
+        <span>{{localize "DLSHOP.Price"}}</span>
+        <span>{{localize "DLSHOP.Qty"}}</span>
+        <span>{{localize "DLSHOP.Infinite"}}</span>
+        <span>{{localize "DLSHOP.Enabled"}}</span>
+        <span>{{localize "DLSHOP.Badge"}}</span>
+        <span>{{localize "DLSHOP.Rank"}}</span>
+        <span></span>
+      </div>
+      {{#each wares}}
+      <div class="dlshop-table-row {{#unless enabled}}disabled{{/unless}}" data-id="{{id}}">
+        <span class="dlshop-cell-item">
+          <img src="{{img}}" alt="">
+          <span class="name">{{name}}</span>
+        </span>
+        <span class="dlshop-price-inputs">
+          {{#each @root.denominations as |d|}}
+          <input type="number" class="coin {{d.key}}" name="wares.{{../id}}.price.{{d.key}}" value="{{lookup ../coins d.key}}"
+                 min="0" step="1" data-tooltip="{{d.name}}" aria-label="{{d.name}}">
+          {{/each}}
+        </span>
+        <input type="number" name="wares.{{id}}.quantity" value="{{quantity}}" min="0" step="1" {{disabled infinite}}>
+        <input type="checkbox" name="wares.{{id}}.infinite" {{checked infinite}}>
+        <input type="checkbox" name="wares.{{id}}.enabled" {{checked enabled}}>
+        <input type="text" name="wares.{{id}}.badge" value="{{badge}}" placeholder="{{localize 'DLSHOP.BadgeExample'}}" maxlength="12">
+        <input type="text" name="wares.{{id}}.rank" value="{{rank}}" placeholder="{{localize 'DLSHOP.RankExample'}}" maxlength="4">
+        <span class="dlshop-row-buttons">
+          <button type="button" class="icon" data-action="viewWare" data-tooltip="DLSHOP.ViewSource"><i class="fa-solid fa-file-lines"></i></button>
+          <button type="button" class="icon danger" data-action="removeWare" data-tooltip="DLSHOP.Remove"><i class="fa-solid fa-trash"></i></button>
+        </span>
+      </div>
+      {{/each}}
+      <div class="dlshop-dropzone"><i class="fa-solid fa-hand-pointer"></i> {{localize "DLSHOP.DropWares"}}</div>
+    </div>
+  </section>
+
+  {{!-- Buys --}}
+  <section class="dlshop-pane {{#if (eq tab 'buys')}}active{{/if}}">
+    <div class="form-group">
+      <label>{{localize "DLSHOP.Field.BuyBack"}}</label>
+      <input type="checkbox" name="buyBack" {{checked shop.buyBack}}>
+      <p class="hint">{{localize "DLSHOP.Field.BuyBackHint"}}</p>
+    </div>
+    <div class="form-group">
+      <label>{{localize "DLSHOP.Field.SellRatio"}}</label>
+      <input type="number" name="sellPercent" value="{{sellPercent}}" min="0" step="5">
+    </div>
+    <p class="hint">{{localize "DLSHOP.WantsHint"}}</p>
+    <div class="dlshop-table wants" data-drop="buys">
+      <div class="dlshop-table-head">
+        <span>{{localize "DLSHOP.ItemName"}}</span><span>{{localize "DLSHOP.Pays"}}</span><span></span>
+      </div>
+      {{#each wants}}
+      <div class="dlshop-table-row" data-id="{{id}}">
+        <span class="dlshop-cell-item">
+          <img src="{{img}}" alt="">
+          <input type="text" name="wants.{{id}}.name" value="{{name}}">
+        </span>
+        <span class="dlshop-price-inputs">
+          {{#each @root.denominations as |d|}}
+          <input type="number" class="coin {{d.key}}" name="wants.{{../id}}.price.{{d.key}}" value="{{lookup ../coins d.key}}"
+                 min="0" step="1" data-tooltip="{{d.name}}" aria-label="{{d.name}}">
+          {{/each}}
+        </span>
+        <span class="dlshop-row-buttons">
+          <button type="button" class="icon danger" data-action="removeWant" data-tooltip="DLSHOP.Remove"><i class="fa-solid fa-trash"></i></button>
+        </span>
+      </div>
+      {{/each}}
+      <div class="dlshop-dropzone"><i class="fa-solid fa-hand-pointer"></i> {{localize "DLSHOP.DropWants"}}</div>
+    </div>
+    <button type="button" class="dlshop-add" data-action="addWant"><i class="fa-solid fa-plus"></i> {{localize "DLSHOP.AddWant"}}</button>
+  </section>
+
+  {{!-- History --}}
+  <section class="dlshop-pane {{#if (eq tab 'history')}}active{{/if}}">
+    {{#if history.length}}
+    <div class="dlshop-history-tools">
+      <span class="hint">{{localize "DLSHOP.HistoryHint" n=history.length}}</span>
+      <button type="button" class="danger" data-action="clearHistory"><i class="fa-solid fa-trash"></i> {{localize "DLSHOP.ClearHistory"}}</button>
+    </div>
+    <div class="dlshop-table history">
+      <div class="dlshop-table-head">
+        <span>{{localize "DLSHOP.History.When"}}</span>
+        <span>{{localize "DLSHOP.History.Type"}}</span>
+        <span>{{localize "DLSHOP.Item"}}</span>
+        <span>{{localize "DLSHOP.Qty"}}</span>
+        <span>{{localize "DLSHOP.History.Total"}}</span>
+        <span>{{localize "DLSHOP.History.Customer"}}</span>
+      </div>
+      {{#each history}}
+      <div class="dlshop-table-row">
+        <span class="dlshop-history-when">{{when}}</span>
+        <span class="dlshop-history-type {{type}}">{{#if (eq type "buy")}}<i class="fa-solid fa-cart-shopping"></i> {{localize "DLSHOP.History.Bought"}}{{else}}<i class="fa-solid fa-hand-holding-dollar"></i> {{localize "DLSHOP.History.Sold"}}{{/if}}</span>
+        <span class="dlshop-cell-item"><img src="{{img}}" alt=""><span class="name">{{itemName}}</span></span>
+        <span class="dlshop-history-qty">{{qty}}</span>
+        <span>{{dlshopCoins total}}</span>
+        <span class="dlshop-history-who">{{actorName}}<small>{{userName}}</small></span>
+      </div>
+      {{/each}}
+    </div>
+    {{else}}
+    <p class="dlshop-empty">{{localize "DLSHOP.NoHistory"}}</p>
+    {{/if}}
+  </section>
+</div>
+
+{{else}}
+{{!-- ===================== Shop list ===================== --}}
+<div class="dlshop-manager-body">
+  <ol class="dlshop-cards">
+    {{#each shops}}
+    <li class="dlshop-card {{#unless open}}closed{{/unless}}" data-shop-id="{{id}}">
+      <div class="dlshop-card-art" {{#if background}}style="background-image: url('{{background}}')"{{/if}}>
+        <img src="{{#if keeper}}{{keeper.img}}{{else}}icons/svg/mystery-man.svg{{/if}}" alt="">
+      </div>
+      <a class="dlshop-card-text" data-action="edit">
+        <h3>{{name}}</h3>
+        {{#if subtitle}}<p class="sub">{{subtitle}}</p>{{/if}}
+        <p class="meta">
+          <span><i class="fa-solid fa-user"></i> {{#if keeper}}{{keeper.name}}{{else}}<em>{{localize "DLSHOP.NoKeeper"}}</em>{{/if}}</span>
+          <span><i class="fa-solid fa-boxes-stacked"></i> {{localize "DLSHOP.WaresCount" n=waresCount}}</span>
+          {{#if placed}}<span><i class="fa-solid fa-location-dot"></i> {{localize "DLSHOP.OnScene"}}</span>{{/if}}
+          {{#if hours.enabled}}<span><i class="fa-regular fa-clock"></i> {{hours.from}}–{{hours.to}}</span>{{/if}}
+          {{#unless open}}<span class="closed-tag"><i class="fa-solid fa-door-closed"></i> {{localize "DLSHOP.Closed"}}</span>{{/unless}}
+        </p>
+      </a>
+      <div class="dlshop-card-actions">
+        <button type="button" data-action="edit" data-tooltip="DLSHOP.Manage"><i class="fa-solid fa-feather-pointed"></i></button>
+        <button type="button" data-action="open" data-tooltip="DLSHOP.Preview"><i class="fa-solid fa-eye"></i></button>
+        <button type="button" data-action="toggle" data-tooltip="{{#if open}}DLSHOP.CloseShop{{else}}DLSHOP.OpenShop{{/if}}">
+          <i class="fa-solid {{#if open}}fa-door-open{{else}}fa-door-closed{{/if}}"></i>
+        </button>
+        <button type="button" data-action="place" data-tooltip="DLSHOP.PlaceKeeper" {{disabled (or (not keeper) (not @root.hasScene))}}><i class="fa-solid fa-street-view"></i></button>
+        <button type="button" data-action="duplicate" data-tooltip="DLSHOP.Duplicate"><i class="fa-solid fa-copy"></i></button>
+        <button type="button" class="danger" data-action="delete" data-tooltip="DLSHOP.Delete"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </li>
+    {{else}}
+    <li class="dlshop-empty">{{localize "DLSHOP.NoShops"}}</li>
+    {{/each}}
+  </ol>
+  <button type="button" class="dlshop-add" data-action="create"><i class="fa-solid fa-plus"></i> {{localize "DLSHOP.CreateShop"}}</button>
+
+</div>
+{{/if}}
+</div>

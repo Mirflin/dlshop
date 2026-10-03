@@ -1,0 +1,15 @@
+<div class="dlshop-item">
+  <img class="dlshop-item-img" src="{{item.img}}" alt="{{item.name}}" data-edit="img"
+       {{#if editable}}data-action="editImage" data-tooltip="DLSHOP.ItemSheet.ChangeImage"{{/if}}>
+  <div class="dlshop-item-fields">
+    <div class="form-group">
+      <label>{{localize "DLSHOP.ItemSheet.Name"}}</label>
+      <input type="text" name="name" value="{{item.name}}" required {{disabled (not editable)}}>
+    </div>
+    <div class="form-group">
+      <label>{{localize "DLSHOP.ItemSheet.InventoryId"}}</label>
+      <input type="text" name="flags.dlshop.inventoryId" value="{{inventoryId}}" spellcheck="false"
+             placeholder="{{localize 'DLSHOP.ItemSheet.InventoryIdHint'}}" {{disabled (not editable)}}>
+    </div>
+  </div>
+</div>

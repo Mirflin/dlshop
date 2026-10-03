@@ -1,0 +1,104 @@
+<div class="dlshop-dl">
+  <div class="dlshop-dl-status {{#if conn.loggedIn}}online{{/if}}">
+    <i class="fa-solid {{#if conn.loggedIn}}fa-circle-check{{else}}fa-circle-xmark{{/if}}"></i>
+    <span>{{#if conn.loggedIn}}{{localize "DLSHOP.DL.ConnectedAs" user=conn.username}}{{else}}{{localize "DLSHOP.DL.NotConnected"}}{{/if}}</span>
+    {{#if conn.loggedIn}}
+    <button type="button" class="icon" data-action="reload" data-tooltip="DLSHOP.DL.Reload"><i class="fa-solid fa-rotate"></i></button>
+    <button type="button" data-action="logout"><i class="fa-solid fa-right-from-bracket"></i> {{localize "DLSHOP.DL.Logout"}}</button>
+    {{/if}}
+  </div>
+  {{#if error}}<p class="hint warning"><i class="fa-solid fa-triangle-exclamation"></i> {{error}}</p>{{/if}}
+
+  {{#if conn.loggedIn}}
+  {{!-- ---------- Game ---------- --}}
+  <div class="form-group">
+    <label>{{localize "DLSHOP.DL.Game"}}</label>
+    <select name="gameId">
+      {{selectOptions games selected=conn.gameId blank=(localize "DLSHOP.DL.ChooseGame")}}
+    </select>
+  </div>
+  {{#if isGM}}<p class="hint">{{localize "DLSHOP.DL.GameHintGM"}}</p>{{/if}}
+
+  {{!-- ---------- Link ---------- --}}
+  <fieldset class="dlshop-dl-link">
+    <legend>{{localize "DLSHOP.DL.LinkTitle"}}</legend>
+    <div class="form-group">
+      <label>{{localize "DLSHOP.DL.FoundryActor"}}</label>
+      {{#if selectedActor}}<img class="dlshop-dl-actor-img" src="{{selectedActor.img}}" alt="">{{/if}}
+      <select name="actorId">
+        {{selectOptions actorOptions selected=actorId}}
+      </select>
+    </div>
+    <label class="dlshop-dl-check">
+      <input type="checkbox" name="loadMoney" {{checked loadMoney}}> {{localize "DLSHOP.DL.LoadMoney"}}
+    </label>
+
+    {{#if conn.gameId}}
+    <p class="hint">{{localize "DLSHOP.DL.PickCharacter"}}</p>
+    <ol class="dlshop-dl-characters">
+      {{#each characters}}
+      <li class="dlshop-dl-character {{#if isSelectedLink}}linked{{/if}}" data-character-id="{{id}}">
+        {{#if portrait}}<img src="{{portrait}}" alt="">{{else}}<span class="dlshop-dl-noportrait"><i class="fa-solid fa-user"></i></span>{{/if}}
+        <div class="dlshop-dl-character-text">
+          <strong>{{name}}</strong>
+          <small>
+            {{#if @root.isGM}}{{owner}} · {{/if}}
+            <span class="dl-coins"><span class="dl-coin gold">{{coins.gold}}</span><span class="dl-coin silver">{{coins.silver}}</span><span class="dl-coin bronze">{{coins.bronze}}</span></span>
+          </small>
+          {{#if linkedTo}}<small class="dlshop-dl-linkedto"><i class="fa-solid fa-link"></i> {{localize "DLSHOP.DL.LinkedTo" actor=linkedTo}}</small>{{/if}}
+        </div>
+        {{#if isSelectedLink}}
+        <span class="dlshop-dl-badge"><i class="fa-solid fa-check"></i> {{localize "DLSHOP.DL.IsLinked"}}</span>
+        {{else}}
+        <button type="button" class="dlshop-deal" data-action="link" {{disabled (not @root.selectedActor)}}>
+          <i class="fa-solid fa-link"></i> {{localize "DLSHOP.DL.Link"}}
+        </button>
+        {{/if}}
+      </li>
+      {{else}}
+      <li class="dlshop-empty">{{localize "DLSHOP.DL.NoCharacters"}}</li>
+      {{/each}}
+    </ol>
+    {{else}}
+    <p class="hint">{{localize "DLSHOP.DL.ChooseGameFirst"}}</p>
+    {{/if}}
+  </fieldset>
+
+  {{!-- ---------- Existing links ---------- --}}
+  {{#if links.length}}
+  <fieldset>
+    <legend>{{localize "DLSHOP.DL.YourLinks"}}</legend>
+    <ol class="dlshop-dl-links">
+      {{#each links}}
+      <li data-actor-id="{{actorId}}">
+        <img src="{{img}}" alt="">
+        <span class="name">{{actorName}}</span>
+        <i class="fa-solid fa-arrow-right-long"></i>
+        <span class="name">{{characterName}}{{#if gameTitle}} <small>({{gameTitle}})</small>{{/if}}</span>
+        <button type="button" class="icon danger" data-action="unlink" data-tooltip="DLSHOP.DL.Unlink"><i class="fa-solid fa-link-slash"></i></button>
+      </li>
+      {{/each}}
+    </ol>
+  </fieldset>
+  {{/if}}
+
+
+  {{else}}
+  {{!-- ---------- Login ---------- --}}
+  <div class="form-group">
+    <label>{{localize "DLSHOP.DL.Email"}}</label>
+    <input type="text" name="email" autocomplete="username" spellcheck="false">
+  </div>
+  <div class="form-group">
+    <label>{{localize "DLSHOP.DL.Password"}}</label>
+    <input type="password" name="password" autocomplete="current-password">
+  </div>
+  <p class="hint">{{localize "DLSHOP.DL.LoginHint"}}</p>
+  <p class="hint">{{localize "DLSHOP.DL.ServerHint" url=apiUrl}}</p>
+  <footer class="dlshop-dl-buttons">
+    <button type="button" class="dlshop-deal" data-action="login" {{disabled busy}}>
+      <i class="fa-solid {{#if busy}}fa-spinner fa-spin{{else}}fa-right-to-bracket{{/if}}"></i> {{localize "DLSHOP.DL.Login"}}
+    </button>
+  </footer>
+  {{/if}}
+</div>

@@ -1,7 +1,8 @@
 {
   "id": "dlshop",
   "title": "DL_shop",
-  "version": "0.0.1",
+  "description": "Medieval-styled shops for Foundry VTT. The GM creates shops, assigns them to shopkeeper actors and stocks them with items; players walk up to a shopkeeper and press G to buy and sell.",
+  "version": "0.1.0",
   "compatibility": {
     "minimum": "14",
     "verified": "14"
@@ -14,8 +15,26 @@
       "flags": {}
     }
   ],
+  "esmodules": [
+    "main.js"
+  ],
+  "styles": [
+    "styles/module.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "languages/en.json"
+    },
+    {
+      "lang": "ru",
+      "name": "Русский",
+      "path": "languages/ru.json"
+    }
+  ],
+  "socket": true,
   "flags": {
     "canUpload": true
-  },
-  "description": ""
+  }
 }
