@@ -48,9 +48,11 @@
     <label>{{localize "DLSHOP.DLImport.Type"}}
       <select name="type">{{selectOptions typeOptions selected=type}}</select>
     </label>
-    <label>{{localize "DLSHOP.DLImport.Folder"}}
-      <select name="folder">{{selectOptions folderOptions selected=folder blank=(localize "DLSHOP.DLImport.NoFolder")}}</select>
-    </label>
+    <div class="dlshop-dli-pack">
+      <span>{{localize "DLSHOP.DLImport.SavedTo"}}</span>
+      <strong><i class="fa-solid fa-book-atlas"></i> {{packLabel}}</strong>
+      {{#if packExists}}<button type="button" class="icon" data-action="openPack" data-tooltip="DLSHOP.DLImport.OpenPack"><i class="fa-solid fa-up-right-from-square"></i></button>{{/if}}
+    </div>
     <button type="button" class="dlshop-deal" data-action="import" {{disabled (or busy (not selectedCount))}}>
       <i class="fa-solid {{#if busy}}fa-spinner fa-spin{{else}}fa-cloud-arrow-down{{/if}}"></i>
       {{localize "DLSHOP.DLImport.Import" n=selectedCount}}

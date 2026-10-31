@@ -23,7 +23,8 @@ export default class DogmaLiterWindow extends HandlebarsApplicationMixin(Applica
       logout: DogmaLiterWindow.#onLogout,
       reload: DogmaLiterWindow.#onReload,
       link: DogmaLiterWindow.#onLink,
-      unlink: DogmaLiterWindow.#onUnlink
+      unlink: DogmaLiterWindow.#onUnlink,
+      openBag: DogmaLiterWindow.#onOpenBag
     }
   };
 
@@ -208,5 +209,11 @@ export default class DogmaLiterWindow extends HandlebarsApplicationMixin(Applica
     await unlinkActor(actor);
     ui.notifications.info(t("DL.Unlinked", {actor: actor.name}));
     this.render();
+  }
+
+  /** Open the DogmaLiter bag of a linked actor, to pull items from it. */
+  static #onOpenBag(event, target) {
+    const actor = game.actors.get(target.closest("[data-actor-id]")?.dataset.actorId);
+    if ( actor ) game.modules.get(MODULE_ID).api.openBag(actor);
   }
 }

@@ -2,6 +2,7 @@ import { MODULE_ID, TEMPLATES, t } from "../config.mjs";
 import { coinsHTML, denominations, getPurse, payFrom, totalCoins } from "../currency.mjs";
 import { getQuantity, getShop, isOutsideHours, sellPrice, stockWordKey } from "../store.mjs";
 import { requestBuy, requestSell } from "../transactions.mjs";
+import { isInactive } from "../pull.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -95,6 +96,7 @@ export default class ShopWindow extends HandlebarsApplicationMixin(ApplicationV2
     }));
 
     const sellables = actor ? actor.items.contents
+      .filter(item => !isInactive(item))
       .map(item => ({item, price: sellPrice(shop, item)}))
       .filter(({price}) => price !== null)
       .map(({item, price}) => ({uuid: item.uuid, name: item.name, img: item.img, price, quantity: getQuantity(item)}))

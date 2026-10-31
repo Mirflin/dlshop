@@ -1,7 +1,7 @@
 import { denominations, getPurse, setPurse } from "./currency.mjs";
 
 /**
- * Add a Gold / Silver / Bronze row to actor sheets. On the Magicpunk TRPG sheet it sits under the
+ * Add a Gold / Silver / Bronze row to actor sheets. On the DogmaLiter sheet it sits under the
  * portraits; on other sheets it goes at the top of the sheet body.
  */
 export function addPurseToSheet(app, html) {

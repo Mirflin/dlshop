@@ -1,6 +1,6 @@
 import { MODULE_ID, TEMPLATES, t } from "../config.mjs";
 import {
-  connection, downloadImage, importedItems, itemDataFromCompendium, listCompendium, listItemTags, uploadUrl
+  connection, defaultItemType, getPack, importedItems, importToPack, listCompendium, listItemTags, uploadUrl
 } from "../dogmaliter.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
@@ -8,12 +8,12 @@ const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 const RARITIES = ["common", "uncommon", "rare", "epic", "masterwork", "legendary", "unique"];
 /** DogmaLiter equipment slots, in the order its own item editor lists them. */
 const SLOTS = ["head", "chest", "gloves", "belt", "boots", "main_hand", "off_hand", "ring", "amulet"];
-const NEW_FOLDER = "__new__";
 
 /**
- * GM window: browse the game's DogmaLiter compendium and create Foundry items from it. Each created
- * item keeps the DogmaLiter id as its Item ID, so it can be stocked in shops and sent back to the web
- * inventory. Importing an item that is already in Foundry updates it instead of making a copy.
+ * GM window: browse the game's DogmaLiter compendium and import items from it into the world's
+ * "DogmaLiter" item compendium (not the Items sidebar). Each imported item keeps the DogmaLiter id as
+ * its Item ID, so it can be stocked in shops and sent back to the web inventory. Importing an item that
+ * is already in the compendium updates it instead of making a copy.
  */
 export default class DogmaLiterImport extends HandlebarsApplicationMixin(ApplicationV2) {
   static DEFAULT_OPTIONS = {
@@ -29,6 +29,7 @@ export default class DogmaLiterImport extends HandlebarsApplicationMixin(Applica
       selectPage: DogmaLiterImport.#onSelectPage,
       clearSelection: DogmaLiterImport.#onClearSelection,
       import: DogmaLiterImport.#onImport,
+      openPack: () => getPack()?.render(true),
       login: () => game.modules.get(MODULE_ID).api.openDogmaLiter()
     }
   };
@@ -50,8 +51,7 @@ export default class DogmaLiterImport extends HandlebarsApplicationMixin(Applica
   /** @type {string[]|null} Item tags of the game, for the tag filter. */
   tags = null;
   tagsFor = "";
-  type = game.documentTypes?.Item?.includes("item") ? "item" : (game.documentTypes?.Item?.find(t => t !== "base") ?? "");
-  folder = "";
+  type = defaultItemType();
   /** @type {Map<string, object>} Selected DogmaLiter items, kept across pages. */
   selected = new Map();
   result = null;
@@ -83,7 +83,7 @@ export default class DogmaLiterImport extends HandlebarsApplicationMixin(Applica
       this.resultKey = key;
     }
 
-    const imported = importedItems();
+    const imported = await importedItems();
     const items = (this.result.items ?? []).map(i => ({
       id: i.id,
       name: i.name,
@@ -115,13 +115,9 @@ export default class DogmaLiterImport extends HandlebarsApplicationMixin(Applica
       type: this.type,
       typeOptions: (game.documentTypes?.Item ?? []).filter(t => t !== "base")
         .map(t => ({value: t, label: game.i18n.localize(CONFIG.Item.typeLabels?.[t] ?? t)})),
-      folder: this.folder,
       imageFolder: game.settings.get(MODULE_ID, "dlImageFolder") || "dogmaliter-images",
-      folderOptions: [
-        {value: NEW_FOLDER, label: t("DLImport.NewFolder")},
-        ...game.folders.filter(f => f.type === "Item").sort((a, b) => a.name.localeCompare(b.name))
-          .map(f => ({value: f.id, label: f.name}))
-      ]
+      packLabel: getPack()?.title ?? t("Pull.PackLabel"),
+      packExists: !!getPack()
     });
   }
 
@@ -164,7 +160,6 @@ export default class DogmaLiterImport extends HandlebarsApplicationMixin(Applica
       this.page = 1;
     }
     if ( "type" in data ) this.type = data.type;
-    if ( "folder" in data ) this.folder = data.folder ?? "";
     this.render();
   }
 
@@ -202,35 +197,8 @@ export default class DogmaLiterImport extends HandlebarsApplicationMixin(Applica
     this.busy = true;
     this.render();
     try {
-      let folder = this.folder;
-      if ( folder === NEW_FOLDER ) {
-        const created = await Folder.implementation.create({name: "DogmaLiter", type: "Item"});
-        folder = this.folder = created.id;
-      }
-      const existing = importedItems();
-      const toCreate = [];
-      const toUpdate = [];
-      let imageFailures = 0;
-      for ( const webItem of this.selected.values() ) {
-        let img;
-        if ( webItem.image_id ) {
-          try { img = await downloadImage(webItem.image_id); }
-          catch(err) {
-            imageFailures++;
-            console.warn(`${MODULE_ID} | Could not download the image of ${webItem.name}`, err);
-          }
-        }
-        const current = existing.get(webItem.id);
-        if ( current ) {
-          const data = itemDataFromCompendium(webItem, {type: current.type, img: img ?? current.img});
-          toUpdate.push({_id: current.id, name: data.name, img: data.img, ...(data.system ? {system: data.system} : {}),
-            [`flags.${MODULE_ID}.dogmaliter`]: data.flags[MODULE_ID].dogmaliter});
-        }
-        else toCreate.push(itemDataFromCompendium(webItem, {type: this.type, folder, img}));
-      }
-      if ( toCreate.length ) await Item.implementation.createDocuments(toCreate);
-      if ( toUpdate.length ) await Item.implementation.updateDocuments(toUpdate);
-      ui.notifications.info(t("DLImport.Done", {created: toCreate.length, updated: toUpdate.length}));
+      const {created, updated, imageFailures} = await importToPack([...this.selected.values()], {type: this.type});
+      ui.notifications.info(t("DLImport.Done", {created, updated}));
       if ( imageFailures ) ui.notifications.warn(t("DLImport.ImageFailures", {n: imageFailures}));
       this.selected.clear();
     }

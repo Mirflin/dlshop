@@ -1186,6 +1186,92 @@
 .dlshop-approval footer .decline { background: var(--dl-raised); border: 1px solid var(--dl-border); color: var(--dl-danger); }
 .dlshop-approval footer .decline:hover { background: var(--dl-danger); border-color: var(--dl-danger); color: #fff; }
 
+/* ==========================================================================
+   DogmaLiter bag (pull items) and pulled-item timers
+   ========================================================================== */
+
+.dlshop-bag-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.75rem 1rem;
+}
+.dlshop-bag-head { display: flex; align-items: flex-start; gap: 0.5rem; }
+.dlshop-bag-head .hint { flex: 1; margin: 0; }
+.dlshop .window-content .dlshop-bag-head button.icon { flex: none; width: 30px; height: 30px; padding: 0; }
+.dlshop-bag-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--dl-border);
+  border-radius: 4px;
+  background: var(--dl-panel);
+}
+.dlshop-bag-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--dl-border);
+}
+.dlshop-bag-row:hover { background: var(--dl-raised); }
+.dlshop-bag-row img {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+  border: 1px solid var(--dl-border);
+  border-radius: 3px;
+  background: var(--dl-bg);
+}
+.dlshop-bag-text { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.dlshop-bag-text strong { font-family: var(--dl-font-title); font-size: 1.1rem; font-weight: normal; }
+.dlshop-bag-text small { color: var(--dl-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dlshop-bag-ench { color: var(--dl-accent); }
+.dlshop-bag-qty { color: var(--dl-muted); font-family: var(--dl-font-title); }
+.dlshop .window-content .dlshop-bag-row .dlshop-deal { min-width: 0; height: 30px; padding: 0 0.8rem; }
+
+.dlshop-dli-pack { flex: 1; display: flex; align-items: center; gap: 0.4rem; color: var(--dl-muted); font-family: var(--dl-font-title); }
+.dlshop-dli-pack strong { color: var(--dl-text); font-weight: normal; }
+.dlshop .window-content .dlshop-dli-pack button.icon { width: 28px; height: 28px; padding: 0; }
+
+/* On the character sheet (not a .dlshop window, so the sheet's own colours are spelled out). */
+.dlshop-pull-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  width: fit-content;
+  margin-top: 2px;
+  padding: 0 6px;
+  border: 1px solid #0e7479;
+  border-radius: 10px;
+  background: rgb(22 163 168 / 0.15);
+  color: #16a3a8;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.dlshop-pull-badge.inactive { border-color: #e06b72; background: rgb(224 107 114 / 0.15); color: #e06b72; }
+.r20-inv-row.dlshop-pull-inactive :is(.r20-inv-img, .r20-inv-qty) { opacity: 0.4; filter: grayscale(0.9); }
+.r20-inv-row.dlshop-pull-inactive .r20-inv-name { color: #8c9ba4; }
+.dlshop-pull-reactivate:hover { border-color: #16a3a8 !important; color: #16a3a8 !important; }
+.dlshop-pull-open { margin-top: 10px; }
+
+.dlshop-item-pull {
+  margin: 0;
+  padding: 0.35rem 0.6rem;
+  border: 1px solid var(--dl-accent-dark);
+  border-radius: 4px;
+  background: var(--dl-accent-soft);
+  color: var(--dl-accent);
+}
+.dlshop-item-pull.inactive { border-color: var(--dl-danger); background: rgb(224 107 114 / 0.15); color: var(--dl-danger); }
+
 /* Actors sidebar buttons */
 .dlshop-dir-buttons { display: flex; gap: 4px; flex: 0 0 100%; }
 .dlshop-dir-buttons button { flex: 1; }

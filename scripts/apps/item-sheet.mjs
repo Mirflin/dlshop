@@ -1,4 +1,5 @@
-import { MODULE_ID, TEMPLATES } from "../config.mjs";
+import { MODULE_ID, TEMPLATES, t } from "../config.mjs";
+import { formatRemaining, isInactive, pullOf } from "../pull.mjs";
 
 const { HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -23,6 +24,14 @@ export default class ShopItemSheet extends HandlebarsApplicationMixin(foundry.ap
     const context = await super._prepareContext(options);
     context.item = this.document;
     context.inventoryId = this.document.getFlag(MODULE_ID, "inventoryId") ?? "";
+    const pull = pullOf(this.document);
+    if ( pull ) {
+      const inactive = isInactive(this.document);
+      context.pull = {
+        inactive,
+        text: inactive ? t("Pull.InactiveHint") : t("Pull.ActiveUntil", {time: formatRemaining(pull.expiresAt)})
+      };
+    }
     return context;
   }
 }

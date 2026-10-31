@@ -5,6 +5,8 @@ import { registerSocket, requestSendItem } from "./scripts/transactions.mjs";
 import { FROM_WEB, queuePurseSync, refreshPurseFromWeb, registerDogmaLiterSettings } from "./scripts/dogmaliter.mjs";
 import DogmaLiterWindow from "./scripts/apps/dogmaliter-window.mjs";
 import DogmaLiterImport from "./scripts/apps/dogmaliter-import.mjs";
+import DogmaLiterBag from "./scripts/apps/dogmaliter-bag.mjs";
+import { decorateSheet, isInactive, updateBadges } from "./scripts/pull.mjs";
 import { addPurseToSheet } from "./scripts/sheet.mjs";
 import {
   debouncedPrompt, findNearbyShop, hidePrompt, isPromptKeeper, openNearbyShop, positionPrompt
@@ -137,8 +139,24 @@ Hooks.once("init", () => {
   });
 });
 
+/** Items pulled from a DogmaLiter bag can't be rolled once their time is up. */
+Hooks.once("setup", () => {
+  const ItemClass = CONFIG.Item.documentClass;
+  const roll = ItemClass.prototype.roll;
+  if ( typeof roll !== "function" ) return;
+  ItemClass.prototype.roll = function(...args) {
+    if ( isInactive(this) ) {
+      ui.notifications.warn(t("Pull.Error.InactiveUse", {item: this.name}));
+      return null;
+    }
+    return roll.apply(this, args);
+  };
+});
+
 Hooks.once("ready", () => {
   registerSocket();
+  // Countdowns of pulled items on open sheets.
+  setInterval(() => updateBadges(), 30 * 1000);
   // Opening hours follow the real clock: re-check the trade prompt every minute.
   setInterval(() => debouncedPrompt(), 60 * 1000);
   game.modules.get(MODULE_ID).api = {
@@ -146,6 +164,7 @@ Hooks.once("ready", () => {
     openShop: (shopId, options) => ShopWindow.open(shopId, options),
     openDogmaLiter: () => DogmaLiterWindow.open(),
     openDogmaLiterImport: () => DogmaLiterImport.open(),
+    openBag: actor => DogmaLiterBag.open(actor),
     editShop: shopId => ShopManager.open(shopId)
   };
 });
@@ -202,8 +221,8 @@ Hooks.on("renderActorSheetV2", onSheetOpen);
 Hooks.on("closeActorSheet", onSheetClose);
 Hooks.on("closeActorSheetV2", onSheetClose);
 
-/** The character sheet's Inventory "Send" button (Magicpunk TRPG). Returning false marks it handled. */
-Hooks.on("magicpunktrpg.sendItem", (item, actor) => {
+/** The character sheet's Inventory "Send" button (DogmaLiter). Returning false marks it handled. */
+Hooks.on("dogmaliter.sendItem", (item, actor) => {
   foundry.applications.api.DialogV2.confirm({
     window: {title: t("DL.SendTitle")},
     content: `<p>${t("DL.SendConfirm", {item: foundry.utils.escapeHTML(item.name), actor: foundry.utils.escapeHTML(actor.name)})}</p>`
@@ -214,6 +233,11 @@ Hooks.on("magicpunktrpg.sendItem", (item, actor) => {
 /** Gold / Silver / Bronze on every actor sheet (v1 and v2 sheets). */
 Hooks.on("renderActorSheet", addPurseToSheet);
 Hooks.on("renderActorSheetV2", addPurseToSheet);
+
+/** Timers on pulled items and the "Pull from bag" button on the Inventory page. */
+const openBag = actor => DogmaLiterBag.open(actor);
+Hooks.on("renderActorSheet", (app, html) => decorateSheet(app, html, openBag));
+Hooks.on("renderActorSheetV2", (app, html) => decorateSheet(app, html, openBag));
 
 /** Actors sidebar: DogmaLiter for everyone, the Shop Manager for the GM. */
 Hooks.on("renderActorDirectory", (app, html) => {

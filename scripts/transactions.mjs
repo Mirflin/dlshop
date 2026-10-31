@@ -6,6 +6,7 @@ import {
 import { recordHistory } from "./history.mjs";
 import { characterIdOf, linkOf, sendItemToInventory, sendProblem } from "./dogmaliter.mjs";
 import { askSendApproval } from "./approvals.mjs";
+import { isInactive, pullEntry } from "./pull.mjs";
 
 /**
  * Buying and selling changes the shop's stock (a world setting) and actors the player may not own,
@@ -76,6 +77,28 @@ async function request(op, data, {timeout=15000}={}) {
   return result;
 }
 
+/**
+ * Pull an entry out of the linked DogmaLiter character's bag onto the actor (see scripts/pull.mjs).
+ * Runs through the transaction queue, so two clicks can't pull the same entry twice.
+ */
+export function requestPullItem(actorUuid, entryId) {
+  return request("pullItem", {actorUuid, entryId}, {timeout: 60 * 1000});
+}
+
+async function pullItem({actorUuid, entryId}, user) {
+  const actor = await fromUuid(actorUuid);
+  if ( !user || !(actor instanceof Actor) || !actor.testUserPermission(user, "OWNER") ) {
+    return {ok: false, message: t("Error.NotOwner")};
+  }
+  try {
+    return await pullEntry(actor, entryId);
+  }
+  catch(err) {
+    console.error(`${MODULE_ID} | DogmaLiter pull failed`, err);
+    return {ok: false, message: t("Pull.Error.Failed", {error: err.message})};
+  }
+}
+
 /** Run transactions one at a time so concurrent purchases can't oversell stock. */
 function enqueue(op, data, userId) {
   const run = queue.then(() => execute(op, data, userId)).catch(err => {
@@ -88,6 +111,7 @@ function enqueue(op, data, userId) {
 
 async function execute(op, data, userId) {
   const user = game.users.get(userId);
+  if ( op === "pullItem" ) return pullItem(data, user);
   const shop = getShop(data.shopId);
   if ( !user || !shop ) return {ok: false, message: t("Error.NoShop")};
   if ( !shop.open && !user.isGM ) return {ok: false, message: t("Error.Closed", {shop: shop.name})};
@@ -183,6 +207,7 @@ async function sell(shop, {itemUuid}, qty, user) {
   if ( !(actor instanceof Actor) || !actor.testUserPermission(user, "OWNER") ) {
     return {ok: false, message: t("Error.NotOwner")};
   }
+  if ( isInactive(item) ) return {ok: false, message: t("Pull.Error.InactiveSell", {item: item.name})};
   const price = sellPrice(shop, item);
   if ( price === null ) return {ok: false, message: t("Error.WontBuy", {shop: shop.name, item: item.name})};
   if ( getQuantity(item) < qty ) return {ok: false, message: t("Error.Quantity")};

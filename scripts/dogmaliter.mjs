@@ -55,6 +55,16 @@ export function registerDogmaLiterSettings(menuType) {
     hint: "DLSHOP.DLImport.ImageFolder.Hint",
     scope: "world", config: true, type: String, default: "dogmaliter-images", filePicker: "folder"
   });
+  // How long an item pulled from a DogmaLiter bag stays active in Foundry.
+  game.settings.register(MODULE_ID, "dlPullHours", {
+    name: "DLSHOP.Pull.HoursSetting.Name",
+    hint: "DLSHOP.Pull.HoursSetting.Hint",
+    scope: "world", config: true, type: Number, default: 2, range: {min: 0.25, max: 72, step: 0.25}
+  });
+  // The world compendium that holds every item imported from DogmaLiter.
+  game.settings.register(MODULE_ID, "dlPack", {
+    scope: "world", config: false, type: String, default: `world.${PACK_NAME}`
+  });
   // Login tokens: this browser only.
   game.settings.register(MODULE_ID, "dlAuth", {
     scope: "client", config: false, type: Object, default: {}
@@ -78,6 +88,11 @@ export function connection() {
     gameTitle: gameRef.title ?? ""
   };
 }
+
+/** Name of the world compendium for imported items (its id is `world.<name>`). */
+const PACK_NAME = "dogmaliter-items";
+/** Hidden from players: they could otherwise drag any item out of it onto their characters. */
+const PACK_OWNERSHIP = {PLAYER: "NONE", TRUSTED: "NONE", ASSISTANT: "OWNER"};
 
 /** Older versions also kept the id in a sheet attribute with this name; it is cleaned up on (un)link. */
 const LEGACY_ATTRIBUTE = "Character ID";
@@ -308,21 +323,120 @@ export function itemDataFromCompendium(webItem, {type, folder, img}={}) {
       dogmaliter: {rarity: webItem.rarity ?? "", category: webItem.category ?? "", tags: webItem.tags ?? []}
     }}
   };
-  // Systems built from template.json (Magicpunk) declare which fields each item type has.
+  // Systems built from template.json (DogmaLiter) declare which fields each item type has.
   if ( foundry.utils.getProperty(game.model?.Item?.[type] ?? {}, "description") !== undefined ) {
     data.system = {description: textToHTML(webItem.description)};
   }
   return data;
 }
 
-/** World items already imported from DogmaLiter, by DogmaLiter item id. */
-export function importedItems() {
+/* -------------------------------------------- */
+/*  The DogmaLiter compendium                   */
+/* -------------------------------------------- */
+
+/** The compendium holding imported DogmaLiter items, if it exists yet. */
+export function getPack() {
+  return game.packs.get(setting("dlPack")) ?? game.packs.get(`world.${PACK_NAME}`) ?? null;
+}
+
+/** The compendium holding imported DogmaLiter items, created (hidden from players) on first use. GM only. */
+export async function ensurePack() {
+  let pack = getPack();
+  if ( pack ) return pack;
+  if ( !game.user.isGM ) throw new DogmaLiterError(t("Pull.Error.NoPack"));
+  pack = await foundry.documents.collections.CompendiumCollection.createCompendium({
+    name: PACK_NAME,
+    label: t("Pull.PackLabel"),
+    type: "Item",
+    ownership: PACK_OWNERSHIP
+  });
+  await pack.configure({ownership: PACK_OWNERSHIP});
+  await game.settings.set(MODULE_ID, "dlPack", pack.collection);
+  return pack;
+}
+
+/** Run `fn` with the pack unlocked, locking it again afterwards if it was locked. */
+async function withUnlocked(pack, fn) {
+  const locked = pack.locked;
+  if ( locked ) await pack.configure({locked: false});
+  try { return await fn(); }
+  finally { if ( locked ) await pack.configure({locked: true}); }
+}
+
+/** Items already imported from DogmaLiter (the compendium's index entries), by DogmaLiter item id. */
+export async function importedItems() {
   const map = new Map();
-  for ( const item of game.items ) {
-    const id = item.getFlag(MODULE_ID, "inventoryId");
-    if ( id ) map.set(String(id), item);
+  const pack = getPack();
+  if ( !pack ) return map;
+  const index = await pack.getIndex({fields: [`flags.${MODULE_ID}.inventoryId`, "img", "type"]});
+  for ( const entry of index ) {
+    const id = foundry.utils.getProperty(entry, `flags.${MODULE_ID}.inventoryId`);
+    if ( id ) map.set(String(id), entry);
   }
   return map;
+}
+
+/** The item type new imports use: "item" when the system has it. */
+export function defaultItemType() {
+  const types = (game.documentTypes?.Item ?? []).filter(t => t !== "base");
+  return types.includes("item") ? "item" : (types[0] ?? "");
+}
+
+/** Download a web item's image, or null (with a console warning) if that fails. */
+async function imageFor(webItem) {
+  if ( !webItem.image_id ) return null;
+  try { return await downloadImage(webItem.image_id); }
+  catch(err) {
+    console.warn(`${MODULE_ID} | Could not download the image of ${webItem.name}`, err);
+    return null;
+  }
+}
+
+/**
+ * Create or update compendium items for DogmaLiter items (GM only). Items already in the compendium
+ * are updated rather than copied.
+ * @param {object[]} webItems   DogmaLiter item objects (as the API returns them).
+ * @param {object} [options]
+ * @param {string} [options.type]  Item type for new items.
+ * @returns {Promise<{created: number, updated: number, imageFailures: number}>}
+ */
+export async function importToPack(webItems, {type=defaultItemType()}={}) {
+  const pack = await ensurePack();
+  const existing = await importedItems();
+  const toCreate = [];
+  const toUpdate = [];
+  let imageFailures = 0;
+  for ( const webItem of webItems ) {
+    const img = await imageFor(webItem);
+    if ( webItem.image_id && !img ) imageFailures++;
+    const current = existing.get(webItem.id);
+    if ( current ) {
+      const data = itemDataFromCompendium(webItem, {type: current.type, img: img ?? current.img});
+      toUpdate.push({_id: current._id, name: data.name, img: data.img, ...(data.system ? {system: data.system} : {}),
+        [`flags.${MODULE_ID}.dogmaliter`]: data.flags[MODULE_ID].dogmaliter});
+    }
+    else {
+      const data = itemDataFromCompendium(webItem, {type, img});
+      delete data.folder;
+      toCreate.push(data);
+    }
+  }
+  await withUnlocked(pack, async () => {
+    if ( toCreate.length ) await Item.implementation.createDocuments(toCreate, {pack: pack.collection});
+    if ( toUpdate.length ) await Item.implementation.updateDocuments(toUpdate, {pack: pack.collection});
+  });
+  return {created: toCreate.length, updated: toUpdate.length, imageFailures};
+}
+
+/** The compendium item for a DogmaLiter item, importing it first if it is missing (GM only). */
+export async function compendiumItemFor(webItem) {
+  let entry = (await importedItems()).get(webItem.id);
+  if ( !entry ) {
+    await importToPack([webItem]);
+    entry = (await importedItems()).get(webItem.id);
+  }
+  if ( !entry ) throw new DogmaLiterError(t("Pull.Error.ImportFailed", {item: webItem.name}));
+  return getPack().getDocument(entry._id);
 }
 
 function requireGame(actor) {
@@ -433,9 +547,15 @@ export async function sendItemToInventory(item) {
   const itemId = String(item.getFlag(MODULE_ID, "inventoryId")).trim();
   const gameId = requireGame(actor);
   const quantity = Math.clamp(getQuantity(item), 1, 9999);
-  await api("POST", `/games/${gameId}/characters/${encodeURIComponent(characterId)}/inventory`, {
-    items: [{item_id: itemId, quantity}]
-  });
+  // Items pulled from the bag remember their durability and enchantment; give them back unchanged.
+  const line = {item_id: itemId, quantity};
+  const kept = item.getFlag(MODULE_ID, "dogmaliter") ?? {};
+  if ( kept.maxDurability != null ) {
+    line.max_durability = kept.maxDurability;
+    if ( kept.durability != null ) line.durability = kept.durability;
+  }
+  if ( kept.enchantment ) line.enchantment = kept.enchantment;
+  await api("POST", `/games/${gameId}/characters/${encodeURIComponent(characterId)}/inventory`, {items: [line]});
   const name = item.name;
   await item.delete();
   return {ok: true, message: t("DL.Sent", {qty: quantity, item: name, actor: actor.name})};

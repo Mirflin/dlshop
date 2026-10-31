@@ -216,7 +216,7 @@
       "Menu": {
         "Name": "DogmaLiter Import",
         "Label": "Import Items",
-        "Hint": "Create Foundry items from your DogmaLiter game's compendium. They keep their DogmaLiter ID, so they can be sold in shops and sent back to the web inventory."
+        "Hint": "Import items from your DogmaLiter game's compendium into the world's “DogmaLiter Items” compendium (hidden from players). They keep their DogmaLiter ID, so they can be sold in shops and sent back to the web inventory."
       },
       "Search": "Search the compendium…",
       "AllRarities": "All rarities",
@@ -228,9 +228,6 @@
       "SelectPage": "Select page",
       "Clear": "Clear selection",
       "Type": "Item type",
-      "Folder": "Items folder",
-      "NoFolder": "— no folder —",
-      "NewFolder": "New folder “DogmaLiter”",
       "Import": "Import {n}",
       "Done": "DogmaLiter import: {created} created, {updated} updated.",
       "Failed": "DogmaLiter import failed: {error}",
@@ -256,7 +253,9 @@
         "off_hand": "Off hand",
         "ring": "Ring",
         "amulet": "Amulet"
-      }
+      },
+      "SavedTo": "Saved to compendium:",
+      "OpenPack": "Open the compendium"
     },
     "Approval": {
       "Title": "Send to DogmaLiter?",
@@ -299,6 +298,39 @@
       "Bronze": "Bronze"
     },
     "BadgeExample": "NEW",
-    "RankExample": "S"
+    "RankExample": "S",
+    "Pull": {
+      "HoursSetting": {
+        "Name": "Pulled Item Active Time (hours)",
+        "Hint": "How long an item pulled from a DogmaLiter bag stays active in Foundry (real time). After that it is inactive until the GM reactivates it."
+      },
+      "PackLabel": "DogmaLiter Items",
+      "BagTitle": "Bag: {character}",
+      "OpenBag": "Pull from {character}'s bag",
+      "OpenBagShort": "Open the DogmaLiter bag",
+      "Hint": "The character's bag on DogmaLiter (equipped items are not listed). Pulling MOVES the item into Foundry — it leaves the website — and keeps it active for {hours} (h:mm). After that it is inactive until the GM reactivates it.",
+      "Reload": "Reload the bag",
+      "Pull": "Pull",
+      "EmptyBag": "The bag is empty.",
+      "NotLinked": "{actor} is not linked to a DogmaLiter character.",
+      "ConfirmTitle": "Pull from Bag",
+      "Confirm": "Pull <strong>{item}</strong> ×{qty} into {actor}? It will be removed from the bag on the website and stay active for {time} (h:mm).",
+      "Pulled": "{item} ×{qty} pulled into {actor}. Active for {time} (h:mm).",
+      "Reactivate": "Reactivate (start a new timer)",
+      "Reactivated": "{item} is active again for {time} (h:mm).",
+      "Inactive": "Inactive",
+      "InactiveHint": "Time is up: this item is inactive until the GM reactivates it.",
+      "ActiveHint": "Pulled from DogmaLiter: time left before it becomes inactive (h:mm).",
+      "ActiveUntil": "Pulled from DogmaLiter — active for another {time} (h:mm).",
+      "Error": {
+        "NoPack": "The DogmaLiter compendium does not exist yet. The GM creates it with the first import.",
+        "ImportFailed": "Could not import {item} into the DogmaLiter compendium.",
+        "GMNotLoggedIn": "The GM is not logged in to DogmaLiter, so items can't be pulled right now.",
+        "NotInBag": "That item is no longer in the bag on DogmaLiter.",
+        "Failed": "Could not pull the item: {error}",
+        "InactiveUse": "{item} is inactive. Ask the GM to reactivate it.",
+        "InactiveSell": "{item} is inactive and can't be sold."
+      }
+    }
   }
 }

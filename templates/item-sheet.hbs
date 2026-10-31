@@ -11,5 +11,10 @@
       <input type="text" name="flags.dlshop.inventoryId" value="{{inventoryId}}" spellcheck="false"
              placeholder="{{localize 'DLSHOP.ItemSheet.InventoryIdHint'}}" {{disabled (not editable)}}>
     </div>
+    {{#if pull}}
+    <p class="dlshop-item-pull {{#if pull.inactive}}inactive{{/if}}">
+      <i class="fa-solid {{#if pull.inactive}}fa-lock{{else}}fa-hourglass-half{{/if}}"></i> {{pull.text}}
+    </p>
+    {{/if}}
   </div>
 </div>

@@ -1,0 +1,39 @@
+<div class="dlshop-bag-body">
+  {{#if (not linked)}}
+  <div class="dlshop-dli-notready">
+    <p>{{localize "DLSHOP.Pull.NotLinked" actor=actorName}}</p>
+    <button type="button" class="dlshop-deal" data-action="login"><i class="fa-solid fa-link"></i> {{localize "DLSHOP.DL.Title"}}</button>
+  </div>
+  {{else if (not loggedIn)}}
+  <div class="dlshop-dli-notready">
+    <p>{{localize "DLSHOP.DLImport.NotLoggedIn"}}</p>
+    <button type="button" class="dlshop-deal" data-action="login"><i class="fa-solid fa-link"></i> {{localize "DLSHOP.DL.Title"}}</button>
+  </div>
+  {{else}}
+  <div class="dlshop-bag-head">
+    <p class="hint">{{localize "DLSHOP.Pull.Hint" hours=hours}}</p>
+    <button type="button" class="icon" data-action="reload" data-tooltip="DLSHOP.Pull.Reload"><i class="fa-solid fa-rotate"></i></button>
+  </div>
+  {{#if error}}<p class="hint warning"><i class="fa-solid fa-triangle-exclamation"></i> {{error}}</p>{{/if}}
+  <ol class="dlshop-bag-list">
+    {{#each entries}}
+    <li class="dlshop-bag-row" data-entry-id="{{id}}">
+      <img src="{{img}}" alt="">
+      <span class="dlshop-bag-text">
+        <strong>{{name}}{{#if enchantment}} <span class="dlshop-bag-ench">{{enchantment}}</span>{{/if}}</strong>
+        <small>
+          <span class="dlshop-dli-rarity" data-rarity="{{rarity}}">{{rarity}}</span>{{#if category}} · {{category}}{{/if}}
+          {{#if durability}} · <i class="fa-solid fa-shield-halved"></i> {{durability}}{{/if}}
+        </small>
+      </span>
+      <span class="dlshop-bag-qty">×{{quantity}}</span>
+      <button type="button" class="dlshop-deal" data-action="pull" {{disabled busy}}>
+        <i class="fa-solid {{#if busy}}fa-spinner fa-spin{{else}}fa-hand-holding{{/if}}"></i> {{localize "DLSHOP.Pull.Pull"}}
+      </button>
+    </li>
+    {{else}}
+    <li class="dlshop-empty">{{localize "DLSHOP.Pull.EmptyBag"}}</li>
+    {{/each}}
+  </ol>
+  {{/if}}
+</div>
